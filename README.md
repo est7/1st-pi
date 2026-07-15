@@ -93,6 +93,14 @@ pi -e .
 
 斜杠前是 light theme，斜杠后是 dark theme。
 
+## Custom header
+
+`extensions/custom-header.ts` 使用 `1st-agent` ASCII wordmark 替换 Pi 默认启动 header。需要临时恢复默认 header 时运行：
+
+```text
+/builtin-header
+```
+
 ## 内置依赖
 
 | 包 | 功能 |

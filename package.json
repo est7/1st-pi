@@ -53,6 +53,10 @@
     "pi-web-access",
     "pi-xai"
   ],
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
+  },
   "pi": {
     "extensions": [
       "./extensions",
