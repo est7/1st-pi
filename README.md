@@ -76,6 +76,23 @@ pi remove git:github.com/est7/1st-pi
 pi -e .
 ```
 
+## Everforest themes
+
+本 preset 包含两个基于本机 Ghostty Everforest Soft 配色制作的 Pi TUI theme：
+
+- `everforest-dark`
+- `everforest-light`
+
+可在 `/settings` 中手动选择。要像 Ghostty 一样随终端背景自动切换，在 Pi 的 `settings.json` 中设置：
+
+```json
+{
+  "theme": "everforest-light/everforest-dark"
+}
+```
+
+斜杠前是 light theme，斜杠后是 dark theme。
+
 ## 内置依赖
 
 | 包 | 功能 |
