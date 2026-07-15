@@ -57,9 +57,10 @@ pi remove git:github.com/est7/1st-pi
 ```text
 1st-pi/
 ├── package.json          # Pi package manifest
-├── extensions/           # TypeScript/JavaScript extensions
+├── extensions/           # 本地 UI 与 community package thin adapters
 ├── skills/               # skills/<name>/SKILL.md
-└── prompts/              # Markdown prompt templates
+├── prompts/              # Markdown prompt templates
+└── themes/               # 从 pi-everforest-tui 同步并校验的 theme resources
 ```
 
 ## 添加自己的资源
@@ -136,7 +137,16 @@ Preset 默认开启以下 TUI 增强，session 中持久化的个人选择优先
 | [@tintinweb/pi-tasks](https://www.npmjs.com/package/@tintinweb/pi-tasks) | Task tracking 与协作 |
 | [@quintinshaw/pi-dynamic-workflows](https://www.npmjs.com/package/@quintinshaw/pi-dynamic-workflows) | 动态 workflows |
 
-这些包均位于 `dependencies`，并由 `package.json` 的 `pi` manifest 显式加载资源。大多数包同时随 preset tarball 分发；`@ff-labs/pi-fff` 不预打包，以便 npm 在 macOS、Linux 和 Windows 上选择正确的原生 binary。
+这些包位于普通 npm `dependencies`，安装 preset 时由 npm 获取，不会塞入 `1st-pi` tarball。`extensions/packages/*.ts` 是只负责调用 dependency extension entrypoint 的 thin adapters；因此依赖可以正常 hoist，同时 Pi manifest 只引用本包内稳定路径。FFF 也会由 npm 在 macOS、Linux 和 Windows 上选择正确的原生 binary。
+
+Themes 以及 `pi-init` / `pi-web-access` skills 是发布所需的静态资源，会从锁定依赖同步到本包。更新 dependencies 后运行：
+
+```bash
+npm run sync:resources
+npm run check:resources
+```
+
+`prepack` 会执行相同校验，防止静态副本与依赖版本漂移。
 
 TUI surface ownership：
 

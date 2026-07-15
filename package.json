@@ -19,6 +19,7 @@
     "extensions",
     "skills",
     "prompts",
+    "themes",
     "README.md",
     "LICENSE"
   ],
@@ -47,54 +48,43 @@
     "pi-tool-display": "^0.5.0",
     "pi-web-access": "^0.13.0"
   },
-  "bundledDependencies": [
-    "@juicesharp/rpiv-ask-user-question",
-    "@mrclrchtr/supi-context",
-    "@narumitw/pi-goal",
-    "@quintinshaw/pi-dynamic-workflows",
-    "@tintinweb/pi-tasks",
-    "@tintinweb/pi-subagents",
-    "pi-btw",
-    "pi-everforest-tui",
-    "pi-init",
-    "pi-mcp-adapter",
-    "pi-observational-memory",
-    "pi-session-name",
-    "pi-tool-display",
-    "pi-web-access"
-  ],
+  "scripts": {
+    "sync:resources": "node scripts/sync-package-resources.mjs",
+    "check:resources": "node scripts/sync-package-resources.mjs --check",
+    "prepack": "npm run check:resources",
+    "pack:dry-run": "npm pack --dry-run --json"
+  },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*",
     "@earendil-works/pi-tui": "*"
   },
   "pi": {
     "extensions": [
-      "node_modules/@quintinshaw/pi-dynamic-workflows/extensions/workflow.ts",
-      "node_modules/pi-everforest-tui/extensions/everforest-tui.ts",
-      "./extensions",
-      "node_modules/pi-tool-display/index.ts",
-      "node_modules/@juicesharp/rpiv-ask-user-question/index.ts",
-      "node_modules/@narumitw/pi-goal/src/goal.ts",
-      "node_modules/pi-observational-memory/src/index.ts",
-      "node_modules/@ff-labs/pi-fff/src/index.ts",
-      "node_modules/pi-btw/extensions/btw.ts",
-      "node_modules/@mrclrchtr/supi-context/src/extension.ts",
-      "node_modules/pi-web-access/index.ts",
-      "node_modules/pi-mcp-adapter/index.ts",
-      "node_modules/pi-session-name/src/index.ts",
-      "node_modules/@tintinweb/pi-tasks/src/index.ts",
-      "node_modules/@tintinweb/pi-subagents/src/index.ts"
+      "./extensions/packages/workflow.ts",
+      "./extensions/packages/everforest.ts",
+      "./extensions/everforest-defaults.ts",
+      "./extensions/custom-header.ts",
+      "./extensions/packages/tool-display.ts",
+      "./extensions/packages/ask-user.ts",
+      "./extensions/packages/goal.ts",
+      "./extensions/packages/observational-memory.ts",
+      "./extensions/packages/fff.ts",
+      "./extensions/packages/btw.ts",
+      "./extensions/packages/supi-context.ts",
+      "./extensions/packages/web-access.ts",
+      "./extensions/packages/mcp-adapter.ts",
+      "./extensions/packages/session-name.ts",
+      "./extensions/packages/tasks.ts",
+      "./extensions/packages/subagents.ts"
     ],
     "skills": [
-      "./skills",
-      "node_modules/pi-web-access/skills",
-      "node_modules/pi-init/skills/init/SKILL.md"
+      "./skills"
     ],
     "prompts": [
       "./prompts"
     ],
     "themes": [
-      "node_modules/pi-everforest-tui/themes"
+      "./themes"
     ]
   }
 }
