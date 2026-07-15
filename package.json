@@ -1,6 +1,6 @@
 {
   "name": "1st-pi",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "est7's Pi coding agent preset — skills, extensions, prompts, and themes.",
   "license": "MIT",
   "author": "est7",
@@ -19,7 +19,6 @@
     "extensions",
     "skills",
     "prompts",
-    "themes",
     "README.md",
     "LICENSE"
   ],
@@ -32,26 +31,37 @@
   },
   "homepage": "https://github.com/est7/1st-pi#readme",
   "dependencies": {
+    "@ff-labs/pi-fff": "^0.9.6",
+    "@juicesharp/rpiv-ask-user-question": "^1.20.0",
+    "@mrclrchtr/supi-context": "^2.4.0",
+    "@narumitw/pi-goal": "^0.15.1",
     "@quintinshaw/pi-dynamic-workflows": "^2.13.1",
-    "@tintinweb/pi-tasks": "^0.7.1",
     "@tintinweb/pi-subagents": "^0.14.1",
-    "pi-cache-optimizer": "^2.6.17",
+    "@tintinweb/pi-tasks": "^0.7.1",
+    "pi-btw": "^0.4.1",
+    "pi-everforest-tui": "^0.2.0",
     "pi-init": "^1.0.0",
     "pi-mcp-adapter": "^2.11.0",
+    "pi-observational-memory": "^3.0.3",
     "pi-session-name": "^0.1.2",
-    "pi-web-access": "^0.13.0",
-    "pi-xai": "^0.15.1"
+    "pi-tool-display": "^0.5.0",
+    "pi-web-access": "^0.13.0"
   },
   "bundledDependencies": [
+    "@juicesharp/rpiv-ask-user-question",
+    "@mrclrchtr/supi-context",
+    "@narumitw/pi-goal",
     "@quintinshaw/pi-dynamic-workflows",
     "@tintinweb/pi-tasks",
     "@tintinweb/pi-subagents",
-    "pi-cache-optimizer",
+    "pi-btw",
+    "pi-everforest-tui",
     "pi-init",
     "pi-mcp-adapter",
+    "pi-observational-memory",
     "pi-session-name",
-    "pi-web-access",
-    "pi-xai"
+    "pi-tool-display",
+    "pi-web-access"
   ],
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*",
@@ -59,22 +69,32 @@
   },
   "pi": {
     "extensions": [
+      "node_modules/@quintinshaw/pi-dynamic-workflows/extensions/workflow.ts",
+      "node_modules/pi-everforest-tui/extensions/everforest-tui.ts",
       "./extensions",
+      "node_modules/pi-tool-display/index.ts",
+      "node_modules/@juicesharp/rpiv-ask-user-question/index.ts",
+      "node_modules/@narumitw/pi-goal/src/goal.ts",
+      "node_modules/pi-observational-memory/src/index.ts",
+      "node_modules/@ff-labs/pi-fff/src/index.ts",
+      "node_modules/pi-btw/extensions/btw.ts",
+      "node_modules/@mrclrchtr/supi-context/src/extension.ts",
       "node_modules/pi-web-access/index.ts",
-      "node_modules/pi-xai/index.ts",
       "node_modules/pi-mcp-adapter/index.ts",
-      "node_modules/pi-cache-optimizer/index.ts",
       "node_modules/pi-session-name/src/index.ts",
       "node_modules/@tintinweb/pi-tasks/src/index.ts",
-      "node_modules/@tintinweb/pi-subagents/src/index.ts",
-      "node_modules/@quintinshaw/pi-dynamic-workflows/extensions/workflow.ts"
+      "node_modules/@tintinweb/pi-subagents/src/index.ts"
     ],
     "skills": [
       "./skills",
       "node_modules/pi-web-access/skills",
       "node_modules/pi-init/skills/init/SKILL.md"
     ],
-    "prompts": ["./prompts"],
-    "themes": ["./themes"]
+    "prompts": [
+      "./prompts"
+    ],
+    "themes": [
+      "node_modules/pi-everforest-tui/themes"
+    ]
   }
 }
