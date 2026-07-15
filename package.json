@@ -46,7 +46,6 @@
     "pi-observational-memory": "^3.0.3",
     "pi-readseek": "^0.6.6",
     "pi-session-name": "^0.1.2",
-    "pi-tool-display": "^0.5.0",
     "pi-web-access": "^0.13.0"
   },
   "scripts": {
@@ -65,7 +64,6 @@
       "./extensions/packages/everforest.ts",
       "./extensions/everforest-defaults.ts",
       "./extensions/custom-header.ts",
-      "./extensions/packages/tool-display.ts",
       "./extensions/packages/ask-user.ts",
       "./extensions/packages/goal.ts",
       "./extensions/packages/observational-memory.ts",

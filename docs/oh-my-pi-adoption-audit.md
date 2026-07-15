@@ -2,6 +2,8 @@
 
 Date: 2026-07-15
 
+> **Post-audit update:** The current preset now uses Readseek for `read/edit/write` and FFF for `find/grep`; `pi-tool-display` was removed to maintain one built-in tool owner. The Oh My Pi package conclusions remain unchanged.
+
 ## Decision
 
 Do not add any Oh My Pi package to `1st-pi` or `pi-everforest-tui` now.

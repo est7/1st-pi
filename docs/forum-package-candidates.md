@@ -2,6 +2,8 @@
 
 Date: 2026-07-15
 
+> **Post-review update:** `pi-readseek` was later selected for `read/edit/write`, FFF owns `find/grep`, and `pi-tool-display` was removed to avoid duplicate built-in tool ownership. The report below records the earlier selection point.
+
 ## Sources reviewed
 
 Local clippings under:

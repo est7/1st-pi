@@ -4,6 +4,8 @@ Date: 2026-07-15
 Target: `@earendil-works/pi-coding-agent@0.80.6` on Node.js  
 Decision vocabulary: **Adopt**, **Trial**, **Monitor**, **Reject**
 
+> **Post-audit update:** The user subsequently selected `pi-readseek`. The current preset assigns `read/edit/write` to Readseek and `find/grep` to FFF, and removed `pi-tool-display` to avoid duplicate built-in tool owners. The candidate evidence below remains the historical decision record.
+
 ## Executive verdict
 
 No community package satisfies all five capability contracts, and three of the

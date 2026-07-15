@@ -126,7 +126,6 @@ Preset 默认开启以下 TUI 增强，session 中持久化的个人选择优先
 | [pi-mcp-adapter](https://www.npmjs.com/package/pi-mcp-adapter) | MCP 协议适配 |
 | [pi-everforest-tui](https://www.npmjs.com/package/pi-everforest-tui) | Everforest light/dark themes 与可选 TUI 增强 |
 | [pi-session-name](https://www.npmjs.com/package/pi-session-name) | 自动生成会话标题并同步终端标题 |
-| [pi-tool-display](https://www.npmjs.com/package/pi-tool-display) | 紧凑工具输出与自适应 diff 渲染 |
 | [@juicesharp/rpiv-ask-user-question](https://www.npmjs.com/package/@juicesharp/rpiv-ask-user-question) | 多问题、选项预览和自由输入的结构化提问 UI |
 | [@narumitw/pi-goal](https://www.npmjs.com/package/@narumitw/pi-goal) | Session-scoped `/goal` 持续执行与完成/阻塞门禁 |
 | [pi-observational-memory](https://www.npmjs.com/package/pi-observational-memory) | 跨压缩保留 observations/reflections 的长会话记忆 |
@@ -149,13 +148,38 @@ npm run check:resources
 
 `prepack` 会执行相同校验，防止静态副本与依赖版本漂移。
 
-TUI surface ownership：
+TUI 与 tool ownership：
 
 - `pi-everforest-tui`：全局主题、editor chrome、working/status/footer、Command Center 与 Theme Lab
-- `pi-tool-display`：唯一的内置 tool/diff renderer
-- `@ff-labs/pi-fff` 与 `rg`：简单、透明的文件和文本搜索主路径
-- `pi-readseek`：可选的 parser-backed 结构导航、hashline edit 与 rename；不取代 FFF/grep 的默认搜索路径
+- `@ff-labs/pi-fff`：preset 默认使用 `override` mode，由 FFF 接管 `find`、`grep` 与 `@` autocomplete
+- `pi-readseek`：通过 `readseek.replacedTools` 接管 `read`、`edit`、`write`；结构导航和 hashline 工具继续使用 `readSeek_*` 名称，不与 FFF 争夺 `grep`
+- Pi built-ins：继续负责 `bash`、`ls` 及其原生渲染
+- `pi-mcp-adapter`：负责 MCP 工具与渲染
 - Tasks、Subagents、Workflows、Goal、BTW、Context 与 Memory：继续使用各 package 自己的领域 UI
+
+`pi-tool-display` 已移除，因为它会注册同名的 `read/edit/write/find/grep` overrides，与 Readseek/FFF 形成双重 owner。
+
+要启用上述 Readseek ownership，在 `~/.pi/agent/settings.json` 中加入：
+
+```json
+{
+  "readseek": {
+    "replacedTools": ["read", "edit", "write"]
+  }
+}
+```
+
+`grep` 不加入该数组，因为它由 FFF 接管。修改后运行 `/reload`。
+
+## Preset maintenance skill
+
+添加或移除 community extension 时使用：
+
+```text
+/skill:add-extension-to-1st-agent
+```
+
+该 SOP 覆盖 license/compatibility/ownership gate、thin adapter、README 同步、hoisted npm 安装、native binary、tarball size 与 clean-room smoke tests。
 
 ## 发布
 
