@@ -131,6 +131,7 @@ Preset 默认开启以下 TUI 增强，session 中持久化的个人选择优先
 | [@narumitw/pi-goal](https://www.npmjs.com/package/@narumitw/pi-goal) | Session-scoped `/goal` 持续执行与完成/阻塞门禁 |
 | [pi-observational-memory](https://www.npmjs.com/package/pi-observational-memory) | 跨压缩保留 observations/reflections 的长会话记忆 |
 | [@ff-labs/pi-fff](https://www.npmjs.com/package/@ff-labs/pi-fff) | 本地 Rust 模糊文件/内容搜索与 `@` 自动补全 |
+| [pi-readseek](https://www.npmjs.com/package/pi-readseek) | Parser-backed code map/search、definition/reference、hashline edit 与 workspace rename；其 edit 可进行带警告的 fuzzy anchor relocation，不等同于严格 stale rejection |
 | [pi-btw](https://www.npmjs.com/package/pi-btw) | 不污染主上下文的并行 `/btw` 旁路对话 |
 | [@mrclrchtr/supi-context](https://www.npmjs.com/package/@mrclrchtr/supi-context) | `/supi-context` 上下文组成与 token 占用报告 |
 | [@tintinweb/pi-subagents](https://www.npmjs.com/package/@tintinweb/pi-subagents) | Claude Code 风格 sub-agents |
@@ -152,6 +153,8 @@ TUI surface ownership：
 
 - `pi-everforest-tui`：全局主题、editor chrome、working/status/footer、Command Center 与 Theme Lab
 - `pi-tool-display`：唯一的内置 tool/diff renderer
+- `@ff-labs/pi-fff` 与 `rg`：简单、透明的文件和文本搜索主路径
+- `pi-readseek`：可选的 parser-backed 结构导航、hashline edit 与 rename；不取代 FFF/grep 的默认搜索路径
 - Tasks、Subagents、Workflows、Goal、BTW、Context 与 Memory：继续使用各 package 自己的领域 UI
 
 ## 发布
