@@ -8,6 +8,8 @@
 
 ## 安装
 
+需要 Pi `>=0.80.10`；本 preset 的最新 extension 集合使用该版本的 extension API。
+
 ### GitHub
 
 ```bash
@@ -127,17 +129,19 @@ Preset 默认开启以下 TUI 增强，session 中持久化的个人选择优先
 | [pi-everforest-tui](https://www.npmjs.com/package/pi-everforest-tui) | Everforest light/dark themes 与可选 TUI 增强 |
 | [pi-session-name](https://www.npmjs.com/package/pi-session-name) | 自动生成会话标题并同步终端标题 |
 | [@juicesharp/rpiv-ask-user-question](https://www.npmjs.com/package/@juicesharp/rpiv-ask-user-question) | 多问题、选项预览和自由输入的结构化提问 UI |
-| [@narumitw/pi-goal](https://www.npmjs.com/package/@narumitw/pi-goal) | Session-scoped `/goal` 持续执行与完成/阻塞门禁 |
+| [@narumitw/pi-goal](https://www.npmjs.com/package/@narumitw/pi-goal) | Session-scoped `/goal` 持续执行与完成/阻塞门禁；可选 experimental ordered-goal queue |
 | [pi-observational-memory](https://www.npmjs.com/package/pi-observational-memory) | 跨压缩保留 observations/reflections 的长会话记忆 |
-| [@ff-labs/pi-fff](https://www.npmjs.com/package/@ff-labs/pi-fff) | 本地 Rust 模糊文件/内容搜索与 `@` 自动补全 |
-| [pi-readseek](https://www.npmjs.com/package/pi-readseek) | Parser-backed code map/search、definition/reference、hashline edit 与 workspace rename；其 edit 可进行带警告的 fuzzy anchor relocation，不等同于严格 stale rejection |
+| [@ff-labs/pi-fff](https://www.npmjs.com/package/@ff-labs/pi-fff) | 本地 Rust 模糊文件/内容搜索与 `@` 自动补全；`find`/`grep` 支持 workspace-relative 约束和 workspace 外的绝对路径 |
+| [pi-readseek](https://www.npmjs.com/package/pi-readseek) | Parser-backed code map/search、PDF index/view、definition/reference、hashline edit 与 workspace rename；其 edit 可进行带警告的 fuzzy anchor relocation，不等同于严格 stale rejection |
 | [pi-btw](https://www.npmjs.com/package/pi-btw) | 不污染主上下文的并行 `/btw` 旁路对话 |
 | [@mrclrchtr/supi-context](https://www.npmjs.com/package/@mrclrchtr/supi-context) | `/supi-context` 上下文组成与 token 占用报告 |
 | [@tintinweb/pi-subagents](https://www.npmjs.com/package/@tintinweb/pi-subagents) | Claude Code 风格 sub-agents |
 | [@tintinweb/pi-tasks](https://www.npmjs.com/package/@tintinweb/pi-tasks) | Task tracking 与协作 |
-| [@quintinshaw/pi-dynamic-workflows](https://www.npmjs.com/package/@quintinshaw/pi-dynamic-workflows) | 动态 workflows；preset 默认关闭 `workflow/workflows` 关键词自动触发，仅通过 `/workflows`、已保存 workflow 的 slash command 或显式 `/workflows-trigger on` 启用 |
+| [@quintinshaw/pi-dynamic-workflows](https://www.npmjs.com/package/@quintinshaw/pi-dynamic-workflows) | 动态 workflows；3.x 的关键词只授权模型选择 workflow、不再强制触发；preset 默认关闭该关键词入口，仍可通过 `/workflows`、已保存 workflow slash command 或显式 `/workflows-trigger on` 启用 |
 
 这些包位于普通 npm `dependencies`，安装 preset 时由 npm 获取，不会塞入 `1st-pi` tarball。`extensions/packages/*.ts` 是只负责调用 dependency extension entrypoint 的 thin adapters；因此依赖可以正常 hoist，同时 Pi manifest 只引用本包内稳定路径。FFF 也会由 npm 在 macOS、Linux 和 Windows 上选择正确的原生 binary。
+
+当前 dependency extension 版本以 `package.json` 与 lockfile 为准；维护时使用 npm `latest` 稳定标签，并通过 `npm outdated` 确认没有落后版本。
 
 Themes 以及 `pi-init` / `pi-web-access` skills 是发布所需的静态资源，会从锁定依赖同步到本包。更新 dependencies 后运行：
 
@@ -152,7 +156,7 @@ TUI 与 tool ownership：
 
 - `pi-everforest-tui`：全局主题、editor chrome、working/status/footer、Command Center 与 Theme Lab
 - `@ff-labs/pi-fff`：preset 默认使用 `override` mode，由 FFF 接管 `find`、`grep` 与 `@` autocomplete
-- `pi-readseek`：通过 `readseek.replacedTools` 接管 `read`、`edit`、`write`；结构导航和 hashline 工具继续使用 `readSeek_*` 名称，不与 FFF 争夺 `grep`
+- `pi-readseek`：通过 `readseek.replacedTools` 接管 `read`、`edit`、`write`；`readSeek_grep` 仍可显式用于生成 edit-ready anchors，但 preset 会移除其“优先于 `grep`”提示，默认内容搜索仍由 FFF `grep` 负责
 - Pi built-ins：继续负责 `bash`、`ls` 及其原生渲染
 - `pi-mcp-adapter`：负责 MCP 工具与渲染
 - Tasks、Subagents、Workflows、Goal、BTW、Context 与 Memory：继续使用各 package 自己的领域 UI

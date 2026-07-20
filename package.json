@@ -32,19 +32,19 @@
   },
   "homepage": "https://github.com/est7/1st-pi#readme",
   "dependencies": {
-    "@ff-labs/pi-fff": "^0.9.6",
+    "@ff-labs/pi-fff": "^0.10.0",
     "@juicesharp/rpiv-ask-user-question": "^1.20.0",
-    "@mrclrchtr/supi-context": "^2.4.0",
-    "@narumitw/pi-goal": "^0.15.1",
-    "@quintinshaw/pi-dynamic-workflows": "^2.13.1",
-    "@tintinweb/pi-subagents": "^0.14.1",
+    "@mrclrchtr/supi-context": "^2.5.0",
+    "@narumitw/pi-goal": "^0.20.0",
+    "@quintinshaw/pi-dynamic-workflows": "^3.3.0",
+    "@tintinweb/pi-subagents": "^0.14.2",
     "@tintinweb/pi-tasks": "^0.7.1",
     "pi-btw": "^0.4.1",
     "pi-everforest-tui": "^0.2.0",
     "pi-init": "^1.0.0",
     "pi-mcp-adapter": "^2.11.0",
     "pi-observational-memory": "^3.0.3",
-    "pi-readseek": "^0.6.6",
+    "pi-readseek": "^0.7.8",
     "pi-session-name": "^0.1.2",
     "pi-web-access": "^0.13.0"
   },
@@ -55,8 +55,8 @@
     "pack:dry-run": "npm pack --dry-run --json"
   },
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": "*",
-    "@earendil-works/pi-tui": "*"
+    "@earendil-works/pi-coding-agent": ">=0.80.10",
+    "@earendil-works/pi-tui": ">=0.80.10"
   },
   "pi": {
     "extensions": [
