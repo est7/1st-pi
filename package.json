@@ -32,22 +32,22 @@
   },
   "homepage": "https://github.com/est7/1st-pi#readme",
   "dependencies": {
-    "@ff-labs/pi-fff": "^0.10.0",
-    "@juicesharp/rpiv-ask-user-question": "^1.20.0",
-    "@mrclrchtr/supi-context": "^2.5.0",
-    "@narumitw/pi-goal": "^0.20.0",
-    "@quintinshaw/pi-dynamic-workflows": "^3.3.0",
-    "@tintinweb/pi-subagents": "^0.14.2",
-    "@tintinweb/pi-tasks": "^0.7.1",
-    "pi-amq": "^0.1.1",
+    "@ff-labs/pi-fff": "^0.10.5",
+    "@juicesharp/rpiv-ask-user-question": "^2.6.2",
+    "@mrclrchtr/supi-context": "^5.0.0",
+    "@narumitw/pi-goal": "^0.52.1",
+    "@quintinshaw/pi-dynamic-workflows": "^3.7.0",
+    "@tintinweb/pi-subagents": "^0.17.1",
+    "@tintinweb/pi-tasks": "^0.8.0",
+    "pi-amq": "^0.1.2",
     "pi-btw": "^0.4.1",
     "pi-everforest-tui": "^0.2.0",
     "pi-init": "^1.0.0",
-    "pi-mcp-adapter": "^2.11.0",
-    "pi-observational-memory": "^3.0.3",
-    "pi-readseek": "^0.7.8",
+    "pi-mcp-adapter": "^2.26.1",
+    "pi-observational-memory": "^3.0.4",
+    "pi-readseek": "^0.9.13",
     "pi-session-name": "^0.1.2",
-    "pi-web-access": "^0.13.0"
+    "pi-web-access": "^0.24.0"
   },
   "scripts": {
     "sync:resources": "node scripts/sync-package-resources.mjs",
@@ -56,8 +56,8 @@
     "pack:dry-run": "npm pack --dry-run --json"
   },
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": ">=0.80.10",
-    "@earendil-works/pi-tui": ">=0.80.10"
+    "@earendil-works/pi-coding-agent": ">=0.84.2",
+    "@earendil-works/pi-tui": ">=0.84.2"
   },
   "pi": {
     "extensions": [

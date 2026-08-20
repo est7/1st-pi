@@ -5,7 +5,6 @@ const root = resolve(import.meta.dirname, "..");
 const resources = [
   ["node_modules/pi-everforest-tui/themes/everforest-tui-dark.json", "themes/everforest-tui-dark.json"],
   ["node_modules/pi-everforest-tui/themes/everforest-tui-light.json", "themes/everforest-tui-light.json"],
-  ["node_modules/pi-web-access/skills/librarian/SKILL.md", "skills/librarian/SKILL.md"],
   ["node_modules/pi-init/skills/init/SKILL.md", "skills/init/SKILL.md"],
 ];
 

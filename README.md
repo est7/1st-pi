@@ -8,7 +8,7 @@
 
 ## 安装
 
-需要 Pi `>=0.80.10`；本 preset 的最新 extension 集合使用该版本的 extension API。
+需要 Pi `>=0.84.2`；本 preset 的最新 extension 集合使用该版本的 extension API。
 
 ### GitHub
 
@@ -123,7 +123,7 @@ Preset 默认开启以下 TUI 增强，session 中持久化的个人选择优先
 
 | 包 | 功能 |
 |---|---|
-| [pi-web-access](https://www.npmjs.com/package/pi-web-access) | Web 搜索、URL/GitHub/YouTube 访问及 librarian skill |
+| [pi-web-access](https://www.npmjs.com/package/pi-web-access) | Web 搜索、URL/GitHub/YouTube 访问、来源检查与可配置 provider routing |
 | [pi-init](https://www.npmjs.com/package/pi-init) | 生成或更新 `AGENTS.md` 的 init skill |
 | [pi-mcp-adapter](https://www.npmjs.com/package/pi-mcp-adapter) | MCP 协议适配 |
 | [pi-everforest-tui](https://www.npmjs.com/package/pi-everforest-tui) | Everforest light/dark themes 与可选 TUI 增强 |
@@ -143,7 +143,7 @@ Preset 默认开启以下 TUI 增强，session 中持久化的个人选择优先
 
 当前 dependency extension 版本以 `package.json` 与 lockfile 为准；维护时使用 npm `latest` 稳定标签，并通过 `npm outdated` 确认没有落后版本。
 
-Themes 以及 `pi-init` / `pi-web-access` skills 是发布所需的静态资源，会从锁定依赖同步到本包。更新 dependencies 后运行：
+Themes 以及 `pi-init` skill 是发布所需的静态资源，会从锁定依赖同步到本包。`pi-web-access` 从 0.14.0 起不再提供 `librarian` skill，preset 同步移除该过期副本，保留 extension 自身的搜索、抓取与 source-check surface。更新 dependencies 后运行：
 
 ```bash
 npm run sync:resources
