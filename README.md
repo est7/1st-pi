@@ -130,7 +130,6 @@ Preset 默认开启以下 TUI 增强，session 中持久化的个人选择优先
 | [pi-session-name](https://www.npmjs.com/package/pi-session-name) | 自动生成会话标题并同步终端标题 |
 | [@juicesharp/rpiv-ask-user-question](https://www.npmjs.com/package/@juicesharp/rpiv-ask-user-question) | 多问题、选项预览和自由输入的结构化提问 UI |
 | [@narumitw/pi-goal](https://www.npmjs.com/package/@narumitw/pi-goal) | Session-scoped `/goal` 持续执行与完成/阻塞门禁；可选 experimental ordered-goal queue |
-| [pi-observational-memory](https://www.npmjs.com/package/pi-observational-memory) | 跨压缩保留 observations/reflections 的长会话记忆 |
 | [@ff-labs/pi-fff](https://www.npmjs.com/package/@ff-labs/pi-fff) | 本地 Rust 模糊文件/内容搜索与 `@` 自动补全；`find`/`grep` 支持 workspace-relative 约束和 workspace 外的绝对路径 |
 | [pi-readseek](https://www.npmjs.com/package/pi-readseek) | Parser-backed code map/search、PDF index/view、definition/reference、hashline edit 与 workspace rename；其 edit 可进行带警告的 fuzzy anchor relocation，不等同于严格 stale rejection |
 | [pi-btw](https://www.npmjs.com/package/pi-btw) | 不污染主上下文的并行 `/btw` 旁路对话 |

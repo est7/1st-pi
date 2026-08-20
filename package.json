@@ -44,7 +44,6 @@
     "pi-everforest-tui": "^0.2.0",
     "pi-init": "^1.0.0",
     "pi-mcp-adapter": "^2.26.1",
-    "pi-observational-memory": "^3.0.4",
     "pi-readseek": "^0.9.13",
     "pi-session-name": "^0.1.2",
     "pi-web-access": "^0.24.0"
@@ -67,7 +66,6 @@
       "./extensions/custom-header.ts",
       "./extensions/packages/ask-user.ts",
       "./extensions/packages/goal.ts",
-      "./extensions/packages/observational-memory.ts",
       "./extensions/packages/fff.ts",
       "./extensions/packages/readseek.ts",
       "./extensions/packages/btw.ts",
