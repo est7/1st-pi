@@ -1,6 +1,6 @@
 {
   "name": "1st-pi",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "est7's Pi coding agent preset — skills, extensions, prompts, and themes.",
   "license": "MIT",
   "author": "est7",
@@ -32,20 +32,20 @@
   },
   "homepage": "https://github.com/est7/1st-pi#readme",
   "dependencies": {
-    "@ff-labs/pi-fff": "^0.10.5",
-    "@juicesharp/rpiv-ask-user-question": "^2.6.2",
-    "@mrclrchtr/supi-context": "^5.0.0",
-    "@narumitw/pi-goal": "^0.52.1",
-    "@quintinshaw/pi-dynamic-workflows": "^3.7.0",
-    "@tintinweb/pi-subagents": "^0.17.1",
-    "@tintinweb/pi-tasks": "^0.8.0",
-    "pi-btw": "^0.4.1",
+    "@ff-labs/pi-fff": "^0.11.0",
+    "@juicesharp/rpiv-ask-user-question": "^2.12.0",
+    "@mrclrchtr/supi-context": "^8.0.1",
+    "@narumitw/pi-goal": "^0.54.11",
+    "@quintinshaw/pi-dynamic-workflows": "^3.14.0",
+    "@tintinweb/pi-subagents": "^0.20.0",
+    "@tintinweb/pi-tasks": "^0.9.0",
+    "pi-btw": "^0.7.1",
     "pi-everforest-tui": "^0.2.0",
     "pi-init": "^1.0.0",
-    "pi-mcp-adapter": "^2.26.1",
-    "pi-readseek": "^0.9.13",
-    "pi-session-name": "^0.1.2",
-    "pi-web-access": "^0.24.0"
+    "pi-mcp-adapter": "^5.2.0",
+    "pi-readseek": "^0.10.4",
+    "pi-session-name": "^0.1.7",
+    "pi-web-access": "^0.38.0"
   },
   "scripts": {
     "sync:resources": "node scripts/sync-package-resources.mjs",
@@ -54,8 +54,8 @@
     "pack:dry-run": "npm pack --dry-run --json"
   },
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": ">=0.84.2",
-    "@earendil-works/pi-tui": ">=0.84.2"
+    "@earendil-works/pi-coding-agent": ">=1.1.0",
+    "@earendil-works/pi-tui": ">=1.1.0"
   },
   "pi": {
     "extensions": [

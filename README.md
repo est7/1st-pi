@@ -8,7 +8,7 @@
 
 ## 安装
 
-需要 Pi `>=0.84.2`；本 preset 的最新 extension 集合使用该版本的 extension API。
+需要 Pi `>=1.1.0`；`@tintinweb/pi-subagents` 0.20 起要求该版本，`pi-btw` 0.7 起要求 `>=0.85.1`。
 
 ### GitHub
 
@@ -154,11 +154,12 @@ npm run check:resources
 TUI 与 tool ownership：
 
 - `pi-everforest-tui`：全局主题、editor chrome、working/status/footer、Command Center 与 Theme Lab
-- `@ff-labs/pi-fff`：preset 默认使用 `override` mode，由 FFF 接管 `find`、`grep` 与 `@` autocomplete
-- `pi-readseek`：通过 `readseek.replacedTools` 接管 `read`、`edit`、`write`；`readSeek_grep` 仍可显式用于生成 edit-ready anchors，但 preset 会移除其“优先于 `grep`”提示，默认内容搜索仍由 FFF `grep` 负责
+- `@ff-labs/pi-fff`：preset 默认使用 `override` mode，由 FFF 接管 `find`、`grep` 与 `@` autocomplete；`--fff-mode`、`PI_FFF_MODE` 或 `~/.pi/agent/pi-fff.json` 的 `mode` 一旦显式设置，均优先于 preset 默认值
+- `pi-readseek`：通过 `readseek.overrideTools` 接管 `read`、`edit`、`write`；`readSeek_grep` 仍可显式用于生成 edit-ready anchors，但 preset 会移除其“优先于 `grep`”提示，默认内容搜索仍由 FFF `grep` 负责
 - Pi built-ins：继续负责 `bash`、`ls` 及其原生渲染
-- `pi-mcp-adapter`：负责 MCP 工具与渲染
+- `pi-mcp-adapter`：负责 MCP 工具与渲染；首次加载时会在 `settings.json` 的 `extensions` 中写入 `-builtin:mcp`，关闭 Pi 1.x 内置 MCP，避免双重 owner。移除 preset 后可在 `pi config` → Built-in 重新开启
 - Tasks、Subagents、Workflows、Goal、BTW、Context 与 Memory：继续使用各 package 自己的领域 UI
+- `workflow` tool 由 `@quintinshaw/pi-dynamic-workflows` 负责；`@tintinweb/pi-subagents` 0.20 检测到已有 `workflow` tool 时会自动禁用自身 workflows（可在 `.pi/subagents.json` 设置 `"workflowsEnabled": true` 强制并存，不推荐）
 
 Workflow 关键词触发在首次加载 preset 时默认写为关闭；已有明确的 `on`/`off` 用户配置会保留，不会被 preset 覆盖。关闭关键词触发不影响 `/workflows` 及已保存 workflow 的 slash commands。
 
@@ -169,7 +170,7 @@ Workflow 关键词触发在首次加载 preset 时默认写为关闭；已有明
 ```json
 {
   "readseek": {
-    "replacedTools": ["read", "edit", "write"]
+    "overrideTools": ["read", "edit", "write"]
   }
 }
 ```

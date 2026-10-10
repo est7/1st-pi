@@ -1,18 +1,28 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { loadConfig } from "@ff-labs/pi-fff/src/config.ts";
 import registerFff from "@ff-labs/pi-fff/src/index.ts";
 import { registerWithToolTransform } from "./tool-registration-transform.ts";
 
+const PRESET_MODE = "override";
+
+// FFF resolves its mode at session start as flag > env > pi-fff.json > fallback.
+// The preset default fills only the fallback slot, so every explicit choice wins.
+function withPresetModeDefault(pi: ExtensionAPI): void {
+  const getFlag = pi.getFlag.bind(pi);
+  pi.getFlag = ((name: string) => {
+    const value = getFlag(name);
+    if (name !== "fff-mode" || value !== undefined) return value;
+    if (process.env.PI_FFF_MODE || loadConfig().mode) return value;
+    return PRESET_MODE;
+  }) as ExtensionAPI["getFlag"];
+}
+
 export default function fffAdapter(pi: ExtensionAPI): void {
-  const configuredMode = process.env.PI_FFF_MODE;
-  if (!configuredMode) process.env.PI_FFF_MODE = "override";
-  try {
-    registerWithToolTransform(pi, registerFff, (tool) => ({
-      ...tool,
-      promptGuidelines: tool.promptGuidelines?.map(
-        (guideline) => `${tool.name}: ${guideline}`,
-      ),
-    }));
-  } finally {
-    if (!configuredMode) delete process.env.PI_FFF_MODE;
-  }
+  withPresetModeDefault(pi);
+  registerWithToolTransform(pi, registerFff, (tool) => ({
+    ...tool,
+    promptGuidelines: tool.promptGuidelines?.map(
+      (guideline) => `${tool.name}: ${guideline}`,
+    ),
+  }));
 }
