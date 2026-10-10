@@ -158,7 +158,7 @@ TUI 与 tool ownership：
 - Pi built-ins：继续负责 `bash`、`ls` 及其原生渲染
 - Pi 内置 MCP：负责 MCP servers、`/mcp` 与 `pi mcp add/list`，读取 `~/.pi/agent/mcp.json` 与 `.pi/mcp.json`。preset 不再捆绑 `pi-mcp-adapter`；原先放在 `.mcp.json` 或 `~/.config/mcp/mcp.json` 的 servers 需要移入上述文件。曾加载 0.3.0 的用户，`settings.json` 的 `extensions` 中可能残留 adapter 写入的 `-builtin:mcp`，需在 `pi config` → Built-in 重新开启 MCP
 - Tasks、Subagents、Workflows、Goal、BTW、Context 与 Memory：继续使用各 package 自己的领域 UI
-- `workflow` tool 由 `@quintinshaw/pi-dynamic-workflows` 负责；`@tintinweb/pi-subagents` 0.20 检测到已有 `workflow` tool 时会自动禁用自身 workflows（可在 `.pi/subagents.json` 设置 `"workflowsEnabled": true` 强制并存，不推荐）
+- `workflow` tool 由 `@quintinshaw/pi-dynamic-workflows` 负责。`@tintinweb/pi-subagents` 只保留 `Agent` 等 subagent 能力：全局与项目 `subagents.json` 都未设置 `workflowsEnabled` 时，preset 会在 `~/.pi/agent/subagents.json` 写入 `"workflowsEnabled": false`（保留其他字段，格式损坏的文件不动），关闭其 `SubagentWorkflow`，避免每次启动出现 workflow 冲突 warning（见 [tintinweb/pi-subagents#283](https://github.com/tintinweb/pi-subagents/issues/283)）。已有的显式 `true`/`false` 不会被覆盖；设为 `true` 可强制两套 workflow 并存，不推荐
 
 Workflow 关键词触发在首次加载 preset 时默认写为关闭；已有明确的 `on`/`off` 用户配置会保留，不会被 preset 覆盖。关闭关键词触发不影响 `/workflows` 及已保存 workflow 的 slash commands。
 
