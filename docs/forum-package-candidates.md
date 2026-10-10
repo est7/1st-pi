@@ -21,7 +21,7 @@ Popularity is only a discovery signal. It does not prove compatibility, safety, 
 | Capability | Current package | Notes |
 |---|---|---|
 | Web search/fetch/GitHub/PDF/video | `pi-web-access` | Makes `pi-search`, `pi-grok-search`, `pi-smart-fetch`, Tavily/PDF skills, and most single-provider search packages redundant by default. |
-| MCP | `pi-mcp-adapter` | Already covered. |
+| MCP | Pi built-in MCP | Covered by Pi core since 1.x; `pi-mcp-adapter` was removed in 0.3.1 to avoid a duplicate `/mcp` owner. |
 | Subagents | `@tintinweb/pi-subagents` | Do not also install `pi-subagents`, `@gotgenes/pi-subagents`, `pi-crew`, or another agent runtime. |
 | Tasks | `@tintinweb/pi-tasks` | Do not add another todo/task system by default. |
 | Workflows/research/review fan-out | `@quintinshaw/pi-dynamic-workflows` | Already has live progress and `/workflows` TUI. |

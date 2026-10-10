@@ -125,7 +125,6 @@ Preset 默认开启以下 TUI 增强，session 中持久化的个人选择优先
 |---|---|
 | [pi-web-access](https://www.npmjs.com/package/pi-web-access) | Web 搜索、URL/GitHub/YouTube 访问、来源检查与可配置 provider routing |
 | [pi-init](https://www.npmjs.com/package/pi-init) | 生成或更新 `AGENTS.md` 的 init skill |
-| [pi-mcp-adapter](https://www.npmjs.com/package/pi-mcp-adapter) | MCP 协议适配 |
 | [pi-everforest-tui](https://www.npmjs.com/package/pi-everforest-tui) | Everforest light/dark themes 与可选 TUI 增强 |
 | [pi-session-name](https://www.npmjs.com/package/pi-session-name) | 自动生成会话标题并同步终端标题 |
 | [@juicesharp/rpiv-ask-user-question](https://www.npmjs.com/package/@juicesharp/rpiv-ask-user-question) | 多问题、选项预览和自由输入的结构化提问 UI |
@@ -157,7 +156,7 @@ TUI 与 tool ownership：
 - `@ff-labs/pi-fff`：preset 默认使用 `override` mode，由 FFF 接管 `find`、`grep` 与 `@` autocomplete；`--fff-mode`、`PI_FFF_MODE` 或 `~/.pi/agent/pi-fff.json` 的 `mode` 一旦显式设置，均优先于 preset 默认值
 - `pi-readseek`：通过 `readseek.overrideTools` 接管 `read`、`edit`、`write`；`readSeek_grep` 仍可显式用于生成 edit-ready anchors，但 preset 会移除其“优先于 `grep`”提示，默认内容搜索仍由 FFF `grep` 负责
 - Pi built-ins：继续负责 `bash`、`ls` 及其原生渲染
-- `pi-mcp-adapter`：负责 MCP 工具与渲染；首次加载时会在 `settings.json` 的 `extensions` 中写入 `-builtin:mcp`，关闭 Pi 1.x 内置 MCP，避免双重 owner。移除 preset 后可在 `pi config` → Built-in 重新开启
+- Pi 内置 MCP：负责 MCP servers、`/mcp` 与 `pi mcp add/list`，读取 `~/.pi/agent/mcp.json` 与 `.pi/mcp.json`。preset 不再捆绑 `pi-mcp-adapter`；原先放在 `.mcp.json` 或 `~/.config/mcp/mcp.json` 的 servers 需要移入上述文件。曾加载 0.3.0 的用户，`settings.json` 的 `extensions` 中可能残留 adapter 写入的 `-builtin:mcp`，需在 `pi config` → Built-in 重新开启 MCP
 - Tasks、Subagents、Workflows、Goal、BTW、Context 与 Memory：继续使用各 package 自己的领域 UI
 - `workflow` tool 由 `@quintinshaw/pi-dynamic-workflows` 负责；`@tintinweb/pi-subagents` 0.20 检测到已有 `workflow` tool 时会自动禁用自身 workflows（可在 `.pi/subagents.json` 设置 `"workflowsEnabled": true` 强制并存，不推荐）
 

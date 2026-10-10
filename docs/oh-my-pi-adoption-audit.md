@@ -70,7 +70,7 @@ the package decision from the salvageable B or C idea.
 | Subagents and task isolation | `@tintinweb/pi-subagents` | It already supports parallel agents and Git worktree isolation. |
 | Workflow fan-out, pipelines, resume, cost reporting | `@quintinshaw/pi-dynamic-workflows` | Reject another DAG/swarm orchestration domain. |
 | Local fuzzy file/content search and `@` completion | `@ff-labs/pi-fff` | Reject a second native grep/walker stack by default. |
-| Web and MCP | `pi-web-access`, `pi-mcp-adapter` | OMP's built-in web/MCP paths are runtime-fork features, not preset additions. |
+| Web and MCP | `pi-web-access`, Pi built-in MCP | OMP's built-in web/MCP paths are runtime-fork features, not preset additions. |
 | Tasks, goals, side context, context inspection | `@tintinweb/pi-tasks`, `@narumitw/pi-goal`, `pi-btw`, `@mrclrchtr/supi-context` | Do not add overlapping task/state systems. |
 
 The baseline is not merely conceptual. These packages are present in the
