@@ -39,7 +39,6 @@
     "@quintinshaw/pi-dynamic-workflows": "^3.7.0",
     "@tintinweb/pi-subagents": "^0.17.1",
     "@tintinweb/pi-tasks": "^0.8.0",
-    "pi-amq": "^0.1.6",
     "pi-btw": "^0.4.1",
     "pi-everforest-tui": "^0.2.0",
     "pi-init": "^1.0.0",
@@ -74,8 +73,7 @@
       "./extensions/packages/mcp-adapter.ts",
       "./extensions/packages/session-name.ts",
       "./extensions/packages/tasks.ts",
-      "./extensions/packages/subagents.ts",
-      "./extensions/packages/amq.ts"
+      "./extensions/packages/subagents.ts"
     ],
     "skills": [
       "./skills"
