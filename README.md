@@ -127,6 +127,7 @@ Preset 默认开启以下 TUI 增强，session 中持久化的个人选择优先
 | [pi-init](https://www.npmjs.com/package/pi-init) | 生成或更新 `AGENTS.md` 的 init skill |
 | [pi-everforest-tui](https://www.npmjs.com/package/pi-everforest-tui) | Everforest light/dark themes 与可选 TUI 增强 |
 | [pi-session-name](https://www.npmjs.com/package/pi-session-name) | 自动生成会话标题并同步终端标题 |
+| [@pi-kaush/pi-tool-call-markers](https://www.npmjs.com/package/@pi-kaush/pi-tool-call-markers) | 紧凑工具调用标记、连续调用分组，以及仅用于显示的相邻 thinking block 合并 |
 | [@juicesharp/rpiv-ask-user-question](https://www.npmjs.com/package/@juicesharp/rpiv-ask-user-question) | 多问题、选项预览和自由输入的结构化提问 UI |
 | [@narumitw/pi-goal](https://www.npmjs.com/package/@narumitw/pi-goal) | Session-scoped `/goal` 持续执行与完成/阻塞门禁；可选 experimental ordered-goal queue |
 | [@ff-labs/pi-fff](https://www.npmjs.com/package/@ff-labs/pi-fff) | 本地 Rust 模糊文件/内容搜索与 `@` 自动补全；`find`/`grep` 支持 workspace-relative 约束和 workspace 外的绝对路径 |
@@ -155,7 +156,8 @@ TUI 与 tool ownership：
 - `pi-everforest-tui`：全局主题、editor chrome、working/status/footer、Command Center 与 Theme Lab
 - `@ff-labs/pi-fff`：preset 默认使用 `override` mode，由 FFF 接管 `find`、`grep` 与 `@` autocomplete；`--fff-mode`、`PI_FFF_MODE` 或 `~/.pi/agent/pi-fff.json` 的 `mode` 一旦显式设置，均优先于 preset 默认值
 - `pi-readseek`：通过 `readseek.overrideTools` 接管 `read`、`edit`、`write`；`readSeek_grep` 仍可显式用于生成 edit-ready anchors，但 preset 会移除其“优先于 `grep`”提示，默认内容搜索仍由 FFF `grep` 负责
-- Pi built-ins：继续负责 `bash`、`ls` 及其原生渲染
+- `@pi-kaush/pi-tool-call-markers`：负责折叠工具调用、分组、提问结果、thinking labels 与用户 `!` bash 的显示；不注册工具，不改变工具执行或存储的消息。`Ctrl+O` 恢复各工具原有的展开渲染，`/toggle-info` 在当前 session 隐藏或恢复工具调用与 thinking。该包使用受保护的 Pi 内部 prototype adapters，升级 Pi 后需复验；不支持的内部结构回退到原生显示。无原生 binary、网络请求或持久配置写入，license 为 MIT
+- Pi built-ins：继续负责 `bash`、`ls` 的执行及工具展开时的原生渲染
 - Pi 内置 MCP：负责 MCP servers、`/mcp` 与 `pi mcp add/list`，读取 `~/.pi/agent/mcp.json` 与 `.pi/mcp.json`。preset 不再捆绑 `pi-mcp-adapter`；原先放在 `.mcp.json` 或 `~/.config/mcp/mcp.json` 的 servers 需要移入上述文件。曾加载 0.3.0 的用户，`settings.json` 的 `extensions` 中可能残留 adapter 写入的 `-builtin:mcp`，需在 `pi config` → Built-in 重新开启 MCP
 - Tasks、Subagents、Workflows、Goal、BTW、Context 与 Memory：继续使用各 package 自己的领域 UI
 - `workflow` tool 由 `@quintinshaw/pi-dynamic-workflows` 负责。`@tintinweb/pi-subagents` 只保留 `Agent` 等 subagent 能力：全局与项目 `subagents.json` 都未设置 `workflowsEnabled` 时，preset 会在 `~/.pi/agent/subagents.json` 写入 `"workflowsEnabled": false`（保留其他字段，格式损坏的文件不动），关闭其 `SubagentWorkflow`，避免每次启动出现 workflow 冲突 warning（见 [tintinweb/pi-subagents#283](https://github.com/tintinweb/pi-subagents/issues/283)）。已有的显式 `true`/`false` 不会被覆盖；设为 `true` 可强制两套 workflow 并存，不推荐
@@ -163,6 +165,8 @@ TUI 与 tool ownership：
 Workflow 关键词触发在首次加载 preset 时默认写为关闭；已有明确的 `on`/`off` 用户配置会保留，不会被 preset 覆盖。关闭关键词触发不影响 `/workflows` 及已保存 workflow 的 slash commands。
 
 `pi-tool-display` 已移除，因为它会注册同名的 `read/edit/write/find/grep` overrides，与 Readseek/FFF 形成双重 owner。
+
+Tool Call Markers 默认分组相邻调用并折叠工具详情；可用 `PI_TOOL_CALL_MARKERS_COLLAPSE_PARALLEL=0` 关闭同一消息内的调用分组，或用 `PI_ALWAYS_EXPANDED_TOOL_CALL_MARKERS=edit,write` 保持指定工具展开。preset 保留这些环境变量选择。移除 preset 后无额外配置需要清理；若曾单独安装该包，请在 `pi config` 中禁用单独入口，避免重复加载。
 
 要启用上述 Readseek ownership，在 `~/.pi/agent/settings.json` 中加入：
 
