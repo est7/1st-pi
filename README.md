@@ -8,7 +8,15 @@
 
 ## 安装
 
-需要 Pi `>=1.1.0`；`@tintinweb/pi-subagents` 0.20 起要求该版本，`pi-btw` 0.7 起要求 `>=0.85.1`。
+需要 Pi `>=1.1.0`；`@tintinweb/pi-subagents` 0.20 起要求该版本，`pi-btw` 0.7 起要求 `>=0.85.1`。`pi-web-access` 0.44 要求 Node `>=22.19.0`。
+
+macOS 上 `pi-readseek` 的原生二进制动态链接 Homebrew 库，缺少任意一个时 `read`/`edit`/`write` 会因 dyld 报错失败（0.11 起新增 `ftxui`，0.12.1 起新增 `re2`）：
+
+```bash
+brew install abseil fmt ftxui gettext glib openssl@4 re2 vips xxhash
+```
+
+preset 的 readseek adapter 会在启动时读取该二进制的 Mach-O load commands，若有 dylib 缺失，就在 session 开始时给出 warning 和对应的 `brew install` 命令（会遵循 `READSEEK_BINARY` 覆盖）。
 
 ### GitHub
 
@@ -131,7 +139,7 @@ Preset 默认开启以下 TUI 增强，session 中持久化的个人选择优先
 | [@juicesharp/rpiv-ask-user-question](https://www.npmjs.com/package/@juicesharp/rpiv-ask-user-question) | 多问题、选项预览和自由输入的结构化提问 UI |
 | [@narumitw/pi-goal](https://www.npmjs.com/package/@narumitw/pi-goal) | Session-scoped `/goal` 持续执行与完成/阻塞门禁；可选 experimental ordered-goal queue |
 | [@ff-labs/pi-fff](https://www.npmjs.com/package/@ff-labs/pi-fff) | 本地 Rust 模糊文件/内容搜索与 `@` 自动补全；`find`/`grep` 支持 workspace-relative 约束和 workspace 外的绝对路径 |
-| [pi-readseek](https://www.npmjs.com/package/pi-readseek) | Parser-backed code map/search、PDF index/view、definition/reference、hashline edit 与 workspace rename；其 edit 可进行带警告的 fuzzy anchor relocation，不等同于严格 stale rejection |
+| [pi-readseek](https://www.npmjs.com/package/pi-readseek) | Parser-backed code map/search、PDF index/view、definition/reference、syntax check、hashline edit 与 workspace rename；caption/OCR/object detection 只在显式调用对应工具时使用本地已安装模型，不会自动下载；其 edit 可进行带警告的 fuzzy anchor relocation，不等同于严格 stale rejection |
 | [pi-btw](https://www.npmjs.com/package/pi-btw) | 不污染主上下文的并行 `/btw` 旁路对话 |
 | [@mrclrchtr/supi-context](https://www.npmjs.com/package/@mrclrchtr/supi-context) | `/supi-context` 上下文组成与 token 占用报告 |
 | [@tintinweb/pi-subagents](https://www.npmjs.com/package/@tintinweb/pi-subagents) | Claude Code 风格 sub-agents |
