@@ -1,7 +1,6 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { loadConfig } from "@ff-labs/pi-fff/src/config.ts";
 import registerFff from "@ff-labs/pi-fff/src/index.ts";
-import { registerWithToolTransform } from "./tool-registration-transform.ts";
 
 const PRESET_MODE = "override";
 
@@ -19,10 +18,5 @@ function withPresetModeDefault(pi: ExtensionAPI): void {
 
 export default function fffAdapter(pi: ExtensionAPI): void {
   withPresetModeDefault(pi);
-  registerWithToolTransform(pi, registerFff, (tool) => ({
-    ...tool,
-    promptGuidelines: tool.promptGuidelines?.map(
-      (guideline) => `${tool.name}: ${guideline}`,
-    ),
-  }));
+  registerFff(pi);
 }

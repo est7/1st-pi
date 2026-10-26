@@ -21,7 +21,11 @@ const writeJson = (path, value) => {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
 };
 const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));
-const readJsonIfExists = (path) => (existsSync(path) ? readJson(path) : {});
+// Load preset TypeScript modules through Pi's own jiti, exactly as Pi loads extensions.
+const importTs = async (relativePath) => {
+  const { createJiti } = await import(pathToFileURL(join(root, "node_modules/@earendil-works/pi-coding-agent/node_modules/jiti/lib/jiti.mjs")).href);
+  return createJiti(import.meta.url).import(join(root, relativePath));
+};
 
 async function openSession(cwd) {
   const sdk = await import(pathToFileURL(join(root, "node_modules/@earendil-works/pi-coding-agent/dist/index.js")).href);
@@ -55,19 +59,22 @@ const scenarios = {
     const names = tools.map((t) => t.name);
     const duplicates = names.filter((n, i) => names.indexOf(n) !== i);
     if (duplicates.length > 0) failures.push(`duplicate tool owners: ${duplicates.join(", ")}`);
-    const owner = (name) => tools.find((t) => t.name === name)?.sourceInfo?.path?.replace(`${root}/`, "") ?? "missing";
-    const expectedOwners = {
-      read: "extensions/packages/readseek.ts", edit: "extensions/packages/readseek.ts", write: "extensions/packages/readseek.ts",
-      grep: "extensions/packages/fff.ts", find: "extensions/packages/fff.ts", bash: "builtin:bash", ls: "builtin:ls",
-    };
-    for (const [name, expected] of Object.entries(expectedOwners)) {
-      if (owner(name) !== expected) failures.push(`${name} owned by ${owner(name)}, expected ${expected}`);
+    // Ownership is part of the reviewed surface snapshot: one `tool -> source` line per tool.
+    const owners = tools.map((t) => `${t.name} -> ${t.sourceInfo?.path?.replace(`${root}/`, "") ?? "missing"}`).sort();
+
+    // Guidelines are what the model actually reads; catch adapter/upstream drift.
+    for (const t of tools) {
+      for (const guideline of t.promptGuidelines ?? []) {
+        if (guideline.startsWith(`${t.name}: ${t.name}:`)) failures.push(`${t.name} guideline has a doubled prefix: ${guideline.slice(0, 80)}`);
+        if (/prefer readSeek_grep over grep/i.test(guideline)) failures.push(`${t.name} guideline contradicts FFF grep ownership: ${guideline.slice(0, 80)}`);
+      }
     }
 
-    const subagents = readJsonIfExists(join(agentDir, "subagents.json"));
-    if (subagents.workflowsEnabled !== false) failures.push(`fresh subagents.json workflowsEnabled=${subagents.workflowsEnabled}, expected false`);
-    const workflows = readJsonIfExists(join(agentDir, "workflows/settings.json"));
-    if (workflows.keywordTriggerEnabled !== false) failures.push(`fresh workflow keywordTriggerEnabled=${workflows.keywordTriggerEnabled}, expected false`);
+    const { PERSISTED_PRESET_DEFAULTS } = await importTs("extensions/packages/preset-defaults.ts");
+    for (const preset of PERSISTED_PRESET_DEFAULTS) {
+      const actual = preset.read(cwd);
+      if (actual !== preset.value) failures.push(`fresh ${preset.id}=${actual}, expected preset default ${preset.value}`);
+    }
 
     const ping = await new Promise((done) => {
       const timer = setTimeout(() => done(undefined), 5000);
@@ -77,22 +84,38 @@ const scenarios = {
     if (ping?.data?.version !== 2) failures.push(`subagents RPC ping returned ${JSON.stringify(ping)}, pi-tasks expects protocol 2`);
 
     const commands = session.extensionRunner.getRegisteredCommands().map((c) => c.name).sort();
-    return { failures, surface: { tools: [...names].sort(), activeTools: session.getActiveToolNames().sort(), commands } };
+    return { failures, surface: { tools: [...names].sort(), activeTools: session.getActiveToolNames().sort(), commands, owners } };
   },
 
+  // Every persisted default receives the opposite explicit value (global for
+  // subagents plus an unrelated key, project-level for subagents) and an explicit
+  // PI_FFF_MODE; none may be overwritten.
   async preserve({ cwd }) {
+    const { session, agentDir } = await openSession(cwd);
+    const failures = [];
+    const { PERSISTED_PRESET_DEFAULTS } = await importTs("extensions/packages/preset-defaults.ts");
+    for (const preset of PERSISTED_PRESET_DEFAULTS) {
+      const actual = preset.read(cwd);
+      if (actual !== !preset.value) failures.push(`explicit ${preset.id} changed to ${actual}`);
+    }
+    const subagents = readJson(join(agentDir, "subagents.json"));
+    if (subagents.keep !== "me") failures.push(`unrelated subagents.json keys lost: ${JSON.stringify(subagents)}`);
+    const grepOwner = session.getAllTools().find((t) => t.name === "grep")?.sourceInfo?.path;
+    if (grepOwner !== "builtin:grep") failures.push(`PI_FFF_MODE=tools-only ignored: grep owned by ${grepOwner}`);
+    return { failures };
+  },
+
+  // An explicit project-level choice must stop the preset from writing globally.
+  async project({ cwd }) {
     const { agentDir } = await openSession(cwd);
     const failures = [];
-    const subagents = readJsonIfExists(join(agentDir, "subagents.json"));
-    if (subagents.workflowsEnabled !== true || subagents.keep !== "me") failures.push(`explicit subagents.json changed: ${JSON.stringify(subagents)}`);
-    const workflows = readJsonIfExists(join(agentDir, "workflows/settings.json"));
-    if (workflows.keywordTriggerEnabled !== true) failures.push(`explicit workflow keywordTriggerEnabled changed: ${JSON.stringify(workflows)}`);
+    if (existsSync(join(agentDir, "subagents.json"))) failures.push(`global subagents.json written despite project choice: ${readFileSync(join(agentDir, "subagents.json"), "utf8")}`);
     return { failures };
   },
 
   async readseek({ cwd }) {
-    const { readseekDylibWarning } = await import(pathToFileURL(join(root, "extensions/packages/readseek-dylibs.ts")).href);
-    const warning = readseekDylibWarning();
+    const { diagnoseReadseekDylibs } = await importTs("extensions/packages/readseek-dylibs.ts");
+    const warning = diagnoseReadseekDylibs()?.warning;
     if (warning) return { failures: [warning] };
     const { session } = await openSession(cwd);
     const tool = (name) => session.state.tools.find((t) => t.name === name);
@@ -113,24 +136,28 @@ const scenarios = {
   async dylibs() {
     const failures = [];
     if (process.platform !== "darwin") return { failures, skipped: "not macOS" };
-    const m = await import(pathToFileURL(join(root, "extensions/packages/readseek-dylibs.ts")).href);
+    const { diagnoseReadseekDylibs } = await importTs("extensions/packages/readseek-dylibs.ts");
     const otool = (path) => execFileSync("otool", ["-L", path], { encoding: "utf8" })
       .split("\n").slice(1).map((l) => l.trim().split(" (")[0]).filter((l) => l && !l.endsWith(":"));
     const hasOtool = spawnSync("otool", ["--version"]).error === undefined;
-    const binary = m.resolveReadseekBinary();
-    if (!binary || !existsSync(binary)) return { failures: [`readseek binary not resolved: ${binary}`] };
-    const linked = m.machODylibs(m.readMachOLoadCommands(binary));
-    if (linked.length === 0) failures.push("no dylibs parsed from readseek binary");
+
+    const actual = diagnoseReadseekDylibs();
+    if (!actual) return { failures: ["readseek binary not resolved or not a 64-bit Mach-O"] };
+    if (actual.linked.length === 0) failures.push("no dylibs parsed from readseek binary");
     if (hasOtool) {
-      if (JSON.stringify(linked) !== JSON.stringify(otool(binary))) failures.push("readseek dylibs differ from otool -L");
-      if (JSON.stringify(m.machODylibs(m.readMachOLoadCommands("/bin/ls"))) !== JSON.stringify(otool("/bin/ls"))) failures.push("universal /bin/ls dylibs differ from otool -L");
+      if (JSON.stringify(actual.linked) !== JSON.stringify(otool(actual.binary))) failures.push("readseek dylibs differ from otool -L");
+      const universal = diagnoseReadseekDylibs({ binary: "/bin/ls" });
+      if (JSON.stringify(universal?.linked) !== JSON.stringify(otool("/bin/ls"))) failures.push("universal /bin/ls dylibs differ from otool -L");
     }
-    const gone = new Set(linked.filter((l) => l.startsWith("/opt/homebrew/opt/")).slice(0, 2));
-    const missing = m.missingDylibs(linked, (p) => !gone.has(p));
-    if (JSON.stringify([...new Set(missing)]) !== JSON.stringify([...gone])) failures.push(`missingDylibs returned ${JSON.stringify(missing)}`);
+
+    // Pretend two Homebrew dylibs are gone; system and @rpath names are never checked on disk.
+    const gone = new Set(actual.linked.filter((l) => l.startsWith("/opt/homebrew/opt/")).slice(0, 2));
+    const simulated = diagnoseReadseekDylibs({ binary: actual.binary, exists: (p) => !gone.has(p) });
+    if (JSON.stringify(simulated?.missing) !== JSON.stringify([...gone])) failures.push(`missing returned ${JSON.stringify(simulated?.missing)}`);
     const formulas = [...new Set([...gone].map((p) => p.split("/")[4]))].join(" ");
-    if (!m.missingDylibsMessage(missing).includes(`brew install ${formulas}`)) failures.push("warning lacks the brew install command");
-    if (m.missingDylibs(["/usr/lib/libSystem.B.dylib", "/System/Library/X", "@rpath/x.dylib"], () => false).length > 0) failures.push("system or @rpath dylibs reported missing");
+    if (gone.size > 0 && !simulated?.warning?.includes(`brew install ${formulas}`)) failures.push("warning lacks the brew install command");
+    const systemOnly = diagnoseReadseekDylibs({ binary: "/bin/ls", exists: () => false });
+    if (systemOnly?.missing.length) failures.push(`system or @rpath dylibs reported missing: ${systemOnly.missing.join(", ")}`);
     return { failures };
   },
 };
@@ -140,7 +167,9 @@ const setups = {
   preserve: (agentDir) => {
     writeJson(join(agentDir, "subagents.json"), { workflowsEnabled: true, keep: "me" });
     writeJson(join(agentDir, "workflows/settings.json"), { keywordTriggerEnabled: true });
+    return { PI_FFF_MODE: "tools-only" };
   },
+  project: (_agentDir, cwd) => writeJson(join(cwd, ".pi/subagents.json"), { workflowsEnabled: true }),
   readseek: (agentDir) => writeJson(join(agentDir, "settings.json"), readseekOverride),
   dylibs: () => {},
 };
@@ -161,11 +190,12 @@ try {
     const cwd = join(scratch, name, "project");
     mkdirSync(agentDir, { recursive: true });
     mkdirSync(cwd, { recursive: true });
-    setups[name](agentDir);
+    const extraEnv = setups[name](agentDir, cwd) ?? {};
+    const { PI_FFF_MODE: _ignored, ...baseEnv } = process.env;
     const run = spawnSync(process.execPath, [import.meta.filename, `--scenario=${name}`], {
       cwd,
       encoding: "utf8",
-      env: { ...process.env, PI_CODING_AGENT_DIR: agentDir, PI_OFFLINE: "1" },
+      env: { ...baseEnv, PI_CODING_AGENT_DIR: agentDir, PI_OFFLINE: "1", ...extraEnv },
       timeout: 180_000,
     });
     const marker = run.stdout?.split("\n").find((l) => l.startsWith("@@SMOKE@@"));

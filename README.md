@@ -200,11 +200,12 @@ Tool Call Markers 默认分组相邻调用并折叠工具详情；可用 `PI_TOO
 
 `npm run smoke` 在隔离的 `PI_CODING_AGENT_DIR` 中通过 Pi SDK 加载 preset，不访问网络、不调用模型，检查：
 
-- 扩展加载无错误且与 `package.json#pi.extensions` 一致；工具无重名 owner；`read/edit/write`、`grep/find`、`bash/ls` 的 owner 符合上文
-- 全新安装时写入 preset 默认值，已有的显式 `subagents.json` / workflow 设置保持不变
+- 扩展加载无错误且与 `package.json#pi.extensions` 一致；工具无重名 owner
+- 工具 prompt guidelines 不出现重复的 `name: name:` 前缀，`readSeek_grep` 不提示优先于 `grep`
+- `extensions/packages/preset-defaults.ts` 中每个持久化默认值：全新安装时写入；全局或项目级已有显式值（含相反值）时不覆盖，也不丢失同文件的其他字段；显式 `PI_FFF_MODE` 优先于 preset 的 FFF mode
 - `pi-tasks` 与 `pi-subagents` 的 RPC 协议版本匹配
 - readseek 在临时文件上执行 read → anchored edit → write，以及 macOS dylib 检测与 `otool -L` 一致
-- 工具与命令集合与 `scripts/smoke-surface.json` 快照一致；有意变更时用 `npm run smoke -- --update` 更新快照，并在 diff 中审阅
+- 工具、命令集合及每个工具的 owner（`owners`）与 `scripts/smoke-surface.json` 快照一致，该快照是 tool ownership 的权威记录；有意变更时用 `npm run smoke -- --update` 更新快照，并在 diff 中审阅
 
 ## 发布
 

@@ -21,7 +21,7 @@ function readAt(fd: number, position: number, length: number): Buffer {
  * Reads only the 64-bit Mach-O header and load commands for `arch`, selecting
  * the matching slice of a universal binary. Returns undefined for other formats.
  */
-export function readMachOLoadCommands(path: string, arch: string = process.arch): Buffer | undefined {
+function readMachOLoadCommands(path: string, arch: string = process.arch): Buffer | undefined {
   const fd = openSync(path, "r");
   try {
     let offset = 0;
@@ -42,7 +42,7 @@ export function readMachOLoadCommands(path: string, arch: string = process.arch)
 }
 
 /** Returns the dylib install names linked by a thin 64-bit Mach-O header plus its load commands. */
-export function machODylibs(binary: Buffer): string[] {
+function machODylibs(binary: Buffer): string[] {
   if (binary.length < 32 || binary.readUInt32LE(0) !== MH_MAGIC_64) return [];
 
   const commandCount = binary.readUInt32LE(16);
@@ -67,13 +67,13 @@ export function machODylibs(binary: Buffer): string[] {
  * cache rather than on disk, and `@rpath`-style names are relative, so only
  * other absolute paths can be checked.
  */
-export function missingDylibs(dylibs: string[], exists: (path: string) => boolean = existsSync): string[] {
+function missingDylibs(dylibs: string[], exists: (path: string) => boolean = existsSync): string[] {
   return dylibs.filter(
     (dylib) => dylib.startsWith("/") && !dylib.startsWith("/usr/lib/") && !dylib.startsWith("/System/") && !exists(dylib),
   );
 }
 
-export function missingDylibsMessage(missing: string[]): string {
+function missingDylibsMessage(missing: string[]): string {
   const formulas = [...new Set(missing.map((dylib) => BREW_FORMULA.exec(dylib)?.[1]).filter((f): f is string => !!f))];
   const unknown = missing.filter((dylib) => !BREW_FORMULA.test(dylib));
   const lines = ["pi-readseek's native binary is missing shared libraries, so read/edit/write will fail until they are installed."];
@@ -83,7 +83,7 @@ export function missingDylibsMessage(missing: string[]): string {
 }
 
 /** Mirrors pi-readseek's own lookup: READSEEK_BINARY, then the platform package beside @jarkkojs/readseek. */
-export function resolveReadseekBinary(): string | undefined {
+function resolveReadseekBinary(): string | undefined {
   const override = process.env.READSEEK_BINARY;
   if (override) return override;
   if (process.platform !== "darwin") return undefined;
@@ -98,12 +98,34 @@ export function resolveReadseekBinary(): string | undefined {
   }
 }
 
-/** Returns a warning when the readseek binary cannot load on this machine, otherwise undefined. */
-export function readseekDylibWarning(): string | undefined {
+export interface DylibDiagnosis {
+  binary: string;
+  /** Install names of every dylib the binary links, in load-command order. */
+  linked: string[];
+  /** Absolute, non-system install names that do not exist on disk. */
+  missing: string[];
+  /** User-facing message with the brew command, or undefined when nothing is missing. */
+  warning: string | undefined;
+}
+
+export interface DiagnoseOptions {
+  /** Binary to inspect; defaults to the readseek binary pi-readseek would run. */
+  binary?: string;
+  exists?: (path: string) => boolean;
+}
+
+/**
+ * Inspects the readseek native binary for dylibs dyld would fail to load.
+ * Returns undefined when there is nothing to inspect (non-macOS, binary not
+ * installed, or not a 64-bit Mach-O for this arch).
+ */
+export function diagnoseReadseekDylibs(options: DiagnoseOptions = {}): DylibDiagnosis | undefined {
   if (process.platform !== "darwin") return undefined;
-  const binary = resolveReadseekBinary();
+  const binary = options.binary ?? resolveReadseekBinary();
   if (!binary || !existsSync(binary)) return undefined;
   const commands = readMachOLoadCommands(binary);
-  const missing = commands ? missingDylibs(machODylibs(commands)) : [];
-  return missing.length > 0 ? missingDylibsMessage(missing) : undefined;
+  if (!commands) return undefined;
+  const linked = machODylibs(commands);
+  const missing = missingDylibs(linked, options.exists);
+  return { binary, linked, missing, warning: missing.length > 0 ? missingDylibsMessage(missing) : undefined };
 }

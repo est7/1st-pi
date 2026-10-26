@@ -37,7 +37,8 @@ There is currently no repository-level compiler, linter, formatter, or unit test
 - `prompts/`: slash-command prompt templates.
 - `themes/`: publishable theme resources synchronized from `pi-everforest-tui`.
 - `scripts/sync-package-resources.mjs`: copies/checks dependency-owned static resources required in the tarball.
-- `scripts/smoke.mjs` and `scripts/smoke-surface.json`: isolated SDK smoke test and the reviewed tool/command surface snapshot.
+- `scripts/smoke.mjs` and `scripts/smoke-surface.json`: isolated SDK smoke test and the reviewed tool/command/owner surface snapshot (the authoritative tool-ownership record).
+- `extensions/packages/preset-defaults.ts`: persisted preset defaults with the unset-vs-explicit rule; smoke iterates this list for fresh and preserve cases.
 - `scripts/check-outdated.mjs`: reports dependencies whose declared range excludes the latest release.
 - `docs/`: audits and package-selection research.
 - `README.md`: user-facing installation, defaults, ownership, commands, and release documentation.
@@ -60,7 +61,7 @@ There is currently no repository-level compiler, linter, formatter, or unit test
 | Check patch whitespace | `git diff --check` |
 | Install local preset | `pi install .` |
 
-No generic `npm test` or `npm run build` command currently exists. `npm run smoke` covers load, ownership, defaults, and the risky readseek path; extend `scripts/smoke.mjs` when a change adds a preset default or ownership rule. For other behavioral changes, create a focused smoke test that exercises the observable path; startup-only validation is insufficient for persistence, UI, mutation, native, or network behavior.
+No generic `npm test` or `npm run build` command currently exists. `npm run smoke` covers load, ownership, defaults, and the risky readseek path; add persisted defaults to `PERSISTED_PRESET_DEFAULTS` (smoke covers them automatically) and extend `scripts/smoke.mjs` for other default or ownership rules. For other behavioral changes, create a focused smoke test that exercises the observable path; startup-only validation is insufficient for persistence, UI, mutation, native, or network behavior.
 
 ## CODING STANDARDS
 
@@ -102,4 +103,4 @@ When changing extension dependencies or inventory, follow `skills/add-extension-
 - Pi built-ins retain `bash`, `ls`, and native rendering.
 - Tasks, Subagents, Workflows, Goal, BTW, Context, and Memory retain their package-owned domain surfaces.
 - The preset defaults Workflow keyword auto-triggering to **off** when unset. Slash commands remain available, and explicit user `on`/`off` choices must be preserved.
-- Themes and the `pi-init`/`pi-web-access` skills are synchronized publishable resources; normal npm dependencies are not bundled into the preset tarball.
+- Themes and the `pi-init` skill are synchronized publishable resources; normal npm dependencies are not bundled into the preset tarball.

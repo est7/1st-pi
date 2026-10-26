@@ -1,18 +1,8 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import {
-  loadWorkflowSettings,
-  saveWorkflowSettingsForCwd,
-} from "@quintinshaw/pi-dynamic-workflows";
-
-export function applyWorkflowPresetDefaults(cwd: string): void {
-  const settings = loadWorkflowSettings({ cwd });
-  if (settings.keywordTriggerEnabled === undefined) {
-    saveWorkflowSettingsForCwd({ keywordTriggerEnabled: false }, cwd);
-  }
-}
+import { applyPresetDefault, workflowKeywordTriggerDisabled } from "./preset-defaults.ts";
 
 export default async function workflowAdapter(pi: ExtensionAPI): Promise<void> {
-  applyWorkflowPresetDefaults(process.cwd());
+  applyPresetDefault(workflowKeywordTriggerDisabled, process.cwd());
 
   const packageEntry = import.meta.resolve("@quintinshaw/pi-dynamic-workflows");
   const extensionUrl = new URL("../extensions/workflow.ts", packageEntry);

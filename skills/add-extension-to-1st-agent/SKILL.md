@@ -74,7 +74,7 @@ npm pack --dry-run --json
 git diff --check
 ```
 
-`npm run smoke` fails when the tool or command surface differs from `scripts/smoke-surface.json`. Review the reported additions and removals against the intended change, then run `npm run smoke -- --update` and commit the snapshot with the dependency change. When adding a preset default or ownership rule, extend `scripts/smoke.mjs` with the fresh-install and explicit-preference cases.
+`npm run smoke` fails when the tool or command surface differs from `scripts/smoke-surface.json`. Review the reported additions and removals against the intended change, then run `npm run smoke -- --update` and commit the snapshot with the dependency change. Persisted preset defaults belong in `extensions/packages/preset-defaults.ts`; smoke derives their fresh-install and explicit-preference cases from `PERSISTED_PRESET_DEFAULTS`. For other defaults or ownership rules, extend `scripts/smoke.mjs`.
 
 Then verify:
 
