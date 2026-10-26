@@ -33,19 +33,19 @@
   "homepage": "https://github.com/est7/1st-pi#readme",
   "dependencies": {
     "@ff-labs/pi-fff": "^0.11.0",
-    "@juicesharp/rpiv-ask-user-question": "^2.12.0",
-    "@mrclrchtr/supi-context": "^8.0.1",
-    "@narumitw/pi-goal": "^0.54.11",
+    "@juicesharp/rpiv-ask-user-question": "^2.15.0",
+    "@mrclrchtr/supi-context": "^11.0.1",
+    "@narumitw/pi-goal": "^0.54.13",
     "@pi-kaush/pi-tool-call-markers": "^0.3.19",
     "@quintinshaw/pi-dynamic-workflows": "^3.14.0",
-    "@tintinweb/pi-subagents": "^0.20.0",
-    "@tintinweb/pi-tasks": "^0.9.0",
-    "pi-btw": "^0.7.1",
+    "@tintinweb/pi-subagents": "^0.22.0",
+    "@tintinweb/pi-tasks": "^0.9.1",
+    "pi-btw": "^0.8.0",
     "pi-everforest-tui": "^0.2.1",
     "pi-init": "^1.0.0",
-    "pi-readseek": "^0.10.4",
+    "pi-readseek": "^0.12.3",
     "pi-session-name": "^0.1.7",
-    "pi-web-access": "^0.38.0"
+    "pi-web-access": "^0.44.0"
   },
   "scripts": {
     "sync:resources": "node scripts/sync-package-resources.mjs",
