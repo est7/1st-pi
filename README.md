@@ -159,34 +159,35 @@ npm run check:resources
 
 `prepack` 会执行相同校验，防止静态副本与依赖版本漂移。
 
-TUI 与 tool ownership：
+TUI 与 tool ownership（每个工具的确切 owner 以 `scripts/smoke-surface.json` 的 `owners` 为准，smoke 会校验）：
 
 - `pi-everforest-tui`：全局主题、editor chrome、working/status/footer、Command Center 与 Theme Lab
-- `@ff-labs/pi-fff`：preset 默认使用 `override` mode，由 FFF 接管 `find`、`grep` 与 `@` autocomplete；`--fff-mode`、`PI_FFF_MODE` 或 `~/.pi/agent/pi-fff.json` 的 `mode` 一旦显式设置，均优先于 preset 默认值
-- `pi-readseek`：通过 `readseek.overrideTools` 接管 `read`、`edit`、`write`；`readSeek_grep` 仍可显式用于生成 edit-ready anchors，但 preset 会移除其“优先于 `grep`”提示，默认内容搜索仍由 FFF `grep` 负责
+- `@ff-labs/pi-fff`：`find`、`grep` 与 `@` autocomplete（`override` mode）
+- `pi-readseek`：`read`、`edit`、`write` 及 `readSeek_*`；preset 移除 `readSeek_grep` 的“优先于 `grep`”提示，默认内容搜索仍由 FFF `grep` 负责
 - `@pi-kaush/pi-tool-call-markers`：负责折叠工具调用、分组、提问结果、thinking labels 与用户 `!` bash 的显示；不注册工具，不改变工具执行或存储的消息。`Ctrl+O` 恢复各工具原有的展开渲染，`/toggle-info` 在当前 session 隐藏或恢复工具调用与 thinking。该包使用受保护的 Pi 内部 prototype adapters，升级 Pi 后需复验；不支持的内部结构回退到原生显示。无原生 binary、网络请求或持久配置写入，license 为 MIT
-- Pi built-ins：继续负责 `bash`、`ls` 的执行及工具展开时的原生渲染
+- Pi built-ins：`bash`、`ls` 的执行及工具展开时的原生渲染
 - Pi 内置 MCP：负责 MCP servers、`/mcp` 与 `pi mcp add/list`，读取 `~/.pi/agent/mcp.json` 与 `.pi/mcp.json`。preset 不再捆绑 `pi-mcp-adapter`；原先放在 `.mcp.json` 或 `~/.config/mcp/mcp.json` 的 servers 需要移入上述文件。曾加载 0.3.0 的用户，`settings.json` 的 `extensions` 中可能残留 adapter 写入的 `-builtin:mcp`，需在 `pi config` → Built-in 重新开启 MCP
-- Tasks、Subagents、Workflows、Goal、BTW、Context 与 Memory：继续使用各 package 自己的领域 UI
-- `workflow` tool 由 `@quintinshaw/pi-dynamic-workflows` 负责。`@tintinweb/pi-subagents` 只保留 `Agent` 等 subagent 能力：全局与项目 `subagents.json` 都未设置 `workflowsEnabled` 时，preset 会在 `~/.pi/agent/subagents.json` 写入 `"workflowsEnabled": false`（保留其他字段，格式损坏的文件不动），关闭其 `SubagentWorkflow`，避免每次启动出现 workflow 冲突 warning（见 [tintinweb/pi-subagents#283](https://github.com/tintinweb/pi-subagents/issues/283)）。已有的显式 `true`/`false` 不会被覆盖；设为 `true` 可强制两套 workflow 并存，不推荐
-
-Workflow 关键词触发在首次加载 preset 时默认写为关闭；已有明确的 `on`/`off` 用户配置会保留，不会被 preset 覆盖。关闭关键词触发不影响 `/workflows` 及已保存 workflow 的 slash commands。
+- Tasks、Subagents、Workflows、Goal、BTW、Context 与 Memory：继续使用各 package 自己的领域 UI；`workflow` tool 只由 `@quintinshaw/pi-dynamic-workflows` 提供
 
 `pi-tool-display` 已移除，因为它会注册同名的 `read/edit/write/find/grep` overrides，与 Readseek/FFF 形成双重 owner。
 
 Tool Call Markers 默认分组相邻调用并折叠工具详情；可用 `PI_TOOL_CALL_MARKERS_COLLAPSE_PARALLEL=0` 关闭同一消息内的调用分组，或用 `PI_ALWAYS_EXPANDED_TOOL_CALL_MARKERS=edit,write` 保持指定工具展开。preset 保留这些环境变量选择。移除 preset 后无额外配置需要清理；若曾单独安装该包，请在 `pi config` 中禁用单独入口，避免重复加载。
 
-要启用上述 Readseek ownership，在 `~/.pi/agent/settings.json` 中加入：
+### Preset 默认值
 
-```json
-{
-  "readseek": {
-    "overrideTools": ["read", "edit", "write"]
-  }
-}
-```
+以下默认值由 `extensions/packages/preset-defaults.ts` 统一管理：仅在用户未做选择时写入对应 package 自己的全局配置文件（保留同文件的其他字段，格式损坏的文件不动）；全局、项目级或环境变量中的任何显式值都优先，且不会被覆盖。写入后各 package 的命令和诊断（如 `/fff-mode`）都如实反映配置来源。
 
-`grep` 不加入该数组，因为它由 FFF 接管。修改后运行 `/reload`。
+| 设置 | preset 默认 | 写入位置 | 视为显式选择的来源 |
+|---|---|---|---|
+| FFF `mode` | `override` | `~/.pi/agent/pi-fff.json` | `--fff-mode`、`PI_FFF_MODE`、`pi-fff.json` 的 `mode` |
+| readseek `overrideTools` | `["read","edit","write"]` | `~/.pi/agent/settings.json` 的 `readseek` | 全局或项目 `.pi/settings.json` 中任意 `readseek.overrideTools` 数组（含 `[]`） |
+| pi-subagents `workflowsEnabled` | `false` | `~/.pi/agent/subagents.json` | 全局或项目 `subagents.json` 中的 `true`/`false` |
+| Workflow `keywordTriggerEnabled` | `false` | workflow 全局 `settings.json` | 全局或项目 workflow 设置中的 `true`/`false` |
+
+- readseek：仅当原生二进制的 dylib 齐全时才写入默认值，否则 `read/edit/write` 保持 Pi built-ins，并提示 `brew install`。要保留 built-ins，设置 `"readseek": { "overrideTools": [] }`；`grep` 不应加入该数组，它由 FFF 接管
+- pi-subagents：关闭其 `SubagentWorkflow`，避免每次启动出现 workflow 冲突 warning（见 [tintinweb/pi-subagents#283](https://github.com/tintinweb/pi-subagents/issues/283)）；设为 `true` 可强制两套 workflow 并存，不推荐
+- Workflow 关键词触发关闭不影响 `/workflows` 及已保存 workflow 的 slash commands
+- 修改上述配置后运行 `/reload`
 
 ## Preset maintenance skill
 
@@ -202,7 +203,7 @@ Tool Call Markers 默认分组相邻调用并折叠工具详情；可用 `PI_TOO
 
 - 扩展加载无错误且与 `package.json#pi.extensions` 一致；工具无重名 owner
 - 工具 prompt guidelines 不出现重复的 `name: name:` 前缀，`readSeek_grep` 不提示优先于 `grep`
-- `extensions/packages/preset-defaults.ts` 中每个持久化默认值：全新安装时写入；全局或项目级已有显式值（含相反值）时不覆盖，也不丢失同文件的其他字段；显式 `PI_FFF_MODE` 优先于 preset 的 FFF mode
+- `PERSISTED_PRESET_DEFAULTS` 中每个默认值：全新安装时写入并生效（`read/edit/write` 归 readseek，`grep/find` 归 FFF）；已有显式值（全局、项目级、`PI_FFF_MODE`）时不覆盖、不写全局文件，且显式选择真正生效；同文件其他字段保留；格式损坏的配置文件原样不动
 - `pi-tasks` 与 `pi-subagents` 的 RPC 协议版本匹配
 - readseek 在临时文件上执行 read → anchored edit → write，以及 macOS dylib 检测与 `otool -L` 一致
 - 工具、命令集合及每个工具的 owner（`owners`）与 `scripts/smoke-surface.json` 快照一致，该快照是 tool ownership 的权威记录；有意变更时用 `npm run smoke -- --update` 更新快照，并在 diff 中审阅

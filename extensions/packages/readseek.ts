@@ -1,5 +1,6 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import registerReadseek from "pi-readseek";
+import { applyPresetDefault, readseekOverrideToolsDefault } from "./preset-defaults.ts";
 import { diagnoseReadseekDylibs } from "./readseek-dylibs.ts";
 
 type RegisteredTool = Parameters<ExtensionAPI["registerTool"]>[0];
@@ -17,6 +18,9 @@ export default function readseekAdapter(pi: ExtensionAPI): void {
   // The macOS binary links Homebrew dylibs it does not ship; surface the exact
   // brew command up front instead of a dyld crash on the first read.
   const warning = diagnoseReadseekDylibs()?.warning;
+  // Hand read/edit/write to readseek only when its binary can load; otherwise the
+  // built-ins keep working until the user installs the missing libraries.
+  if (!warning) applyPresetDefault(readseekOverrideToolsDefault, process.cwd());
   if (warning) {
     pi.on("session_start", async (_event, ctx) => {
       if (ctx.hasUI) ctx.ui.notify(warning, "warning");

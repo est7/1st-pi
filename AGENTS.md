@@ -98,9 +98,7 @@ When changing extension dependencies or inventory, follow `skills/add-extension-
 
 ## IMPORTANT CURRENT DEFAULTS
 
-- FFF owns `find`, `grep`, and `@` autocomplete in `override` mode.
-- Readseek can own `read`, `edit`, and `write`; `grep` remains with FFF.
-- Pi built-ins retain `bash`, `ls`, and native rendering.
+- Tool ownership is recorded in `scripts/smoke-surface.json` (`owners`); smoke enforces it. Summary: FFF owns `find`/`grep`/`@` autocomplete, Readseek owns `read`/`edit`/`write`, Pi built-ins keep `bash`/`ls` and native rendering.
 - Tasks, Subagents, Workflows, Goal, BTW, Context, and Memory retain their package-owned domain surfaces.
-- The preset defaults Workflow keyword auto-triggering to **off** when unset. Slash commands remain available, and explicit user `on`/`off` choices must be preserved.
+- Persisted defaults (FFF `override` mode, readseek `overrideTools`, subagents `workflowsEnabled: false`, workflow keyword trigger off) live in `extensions/packages/preset-defaults.ts`. They are written into each package's own config only while unset; explicit user choices must be preserved. Readseek's default is skipped while its native dylibs are missing.
 - Themes and the `pi-init` skill are synchronized publishable resources; normal npm dependencies are not bundled into the preset tarball.

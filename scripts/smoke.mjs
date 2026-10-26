@@ -14,7 +14,6 @@ import { pathToFileURL } from "node:url";
 
 const root = resolve(import.meta.dirname, "..");
 const surfacePath = join(root, "scripts/smoke-surface.json");
-const readseekOverride = { readseek: { overrideTools: ["read", "edit", "write"] } };
 
 const writeJson = (path, value) => {
   mkdirSync(resolve(path, ".."), { recursive: true });
@@ -72,8 +71,8 @@ const scenarios = {
 
     const { PERSISTED_PRESET_DEFAULTS } = await importTs("extensions/packages/preset-defaults.ts");
     for (const preset of PERSISTED_PRESET_DEFAULTS) {
-      const actual = preset.read(cwd);
-      if (actual !== preset.value) failures.push(`fresh ${preset.id}=${actual}, expected preset default ${preset.value}`);
+      const actual = JSON.stringify(preset.read(cwd));
+      if (actual !== JSON.stringify(preset.value)) failures.push(`fresh ${preset.id}=${actual}, expected preset default ${JSON.stringify(preset.value)}`);
     }
 
     const ping = await new Promise((done) => {
@@ -87,21 +86,25 @@ const scenarios = {
     return { failures, surface: { tools: [...names].sort(), activeTools: session.getActiveToolNames().sort(), commands, owners } };
   },
 
-  // Every persisted default receives the opposite explicit value (global for
-  // subagents plus an unrelated key, project-level for subagents) and an explicit
-  // PI_FFF_MODE; none may be overwritten.
+  // Every persisted default receives an explicit non-default user value; none may
+  // be overwritten, unrelated keys must survive, and the explicit choices must take effect.
   async preserve({ cwd }) {
     const { session, agentDir } = await openSession(cwd);
     const failures = [];
     const { PERSISTED_PRESET_DEFAULTS } = await importTs("extensions/packages/preset-defaults.ts");
+    const ids = PERSISTED_PRESET_DEFAULTS.map((preset) => preset.id);
+    if (JSON.stringify(Object.keys(EXPLICIT).sort()) !== JSON.stringify([...ids].sort())) failures.push(`EXPLICIT does not cover every preset default: ${ids.join(", ")}`);
     for (const preset of PERSISTED_PRESET_DEFAULTS) {
-      const actual = preset.read(cwd);
-      if (actual !== !preset.value) failures.push(`explicit ${preset.id} changed to ${actual}`);
+      const actual = JSON.stringify(preset.read(cwd));
+      if (actual !== JSON.stringify(EXPLICIT[preset.id])) failures.push(`explicit ${preset.id} changed to ${actual}`);
     }
-    const subagents = readJson(join(agentDir, "subagents.json"));
-    if (subagents.keep !== "me") failures.push(`unrelated subagents.json keys lost: ${JSON.stringify(subagents)}`);
-    const grepOwner = session.getAllTools().find((t) => t.name === "grep")?.sourceInfo?.path;
-    if (grepOwner !== "builtin:grep") failures.push(`PI_FFF_MODE=tools-only ignored: grep owned by ${grepOwner}`);
+    if (readJson(join(agentDir, "subagents.json")).keep !== "me") failures.push("unrelated subagents.json keys lost");
+    if (existsSync(join(process.env.HOME, ".pi/agent/settings.json"))) failures.push("readseek default written globally despite a project-level choice");
+    if (existsSync(join(agentDir, "pi-fff.json"))) failures.push("pi-fff.json written despite PI_FFF_MODE");
+    const owner = (name) => session.getAllTools().find((t) => t.name === name)?.sourceInfo?.path;
+    for (const name of ["grep", "read"]) {
+      if (owner(name) !== `builtin:${name}`) failures.push(`explicit choice ignored: ${name} owned by ${owner(name)}`);
+    }
     return { failures };
   },
 
@@ -110,6 +113,16 @@ const scenarios = {
     const { agentDir } = await openSession(cwd);
     const failures = [];
     if (existsSync(join(agentDir, "subagents.json"))) failures.push(`global subagents.json written despite project choice: ${readFileSync(join(agentDir, "subagents.json"), "utf8")}`);
+    return { failures };
+  },
+
+  // A malformed user config file is left byte-for-byte untouched.
+  async malformed({ cwd }) {
+    await openSession(cwd);
+    const failures = [];
+    for (const path of [join(process.env.PI_CODING_AGENT_DIR, "pi-fff.json"), join(process.env.HOME, ".pi/agent/settings.json")]) {
+      if (readFileSync(path, "utf8") !== MALFORMED) failures.push(`malformed ${path} was rewritten`);
+    }
     return { failures };
   },
 
@@ -162,15 +175,32 @@ const scenarios = {
   },
 };
 
+const EXPLICIT = {
+  "subagents.workflowsEnabled": true,
+  "workflows.keywordTriggerEnabled": true,
+  "fff.mode": "tools-only",
+  "readseek.overrideTools": [],
+};
+const MALFORMED = "{ not json\n";
+
+// Setups receive the scenario's isolated agent dir, project cwd, and HOME, and
+// may return extra environment variables.
 const setups = {
-  fresh: (agentDir) => writeJson(join(agentDir, "settings.json"), readseekOverride),
-  preserve: (agentDir) => {
-    writeJson(join(agentDir, "subagents.json"), { workflowsEnabled: true, keep: "me" });
-    writeJson(join(agentDir, "workflows/settings.json"), { keywordTriggerEnabled: true });
-    return { PI_FFF_MODE: "tools-only" };
+  fresh: () => {},
+  preserve: (agentDir, cwd) => {
+    writeJson(join(agentDir, "subagents.json"), { workflowsEnabled: EXPLICIT["subagents.workflowsEnabled"], keep: "me" });
+    writeJson(join(agentDir, "workflows/settings.json"), { keywordTriggerEnabled: EXPLICIT["workflows.keywordTriggerEnabled"] });
+    writeJson(join(cwd, ".pi/settings.json"), { readseek: { overrideTools: EXPLICIT["readseek.overrideTools"] } });
+    return { PI_FFF_MODE: EXPLICIT["fff.mode"] };
   },
   project: (_agentDir, cwd) => writeJson(join(cwd, ".pi/subagents.json"), { workflowsEnabled: true }),
-  readseek: (agentDir) => writeJson(join(agentDir, "settings.json"), readseekOverride),
+  malformed: (agentDir, _cwd, home) => {
+    for (const path of [join(agentDir, "pi-fff.json"), join(home, ".pi/agent/settings.json")]) {
+      mkdirSync(resolve(path, ".."), { recursive: true });
+      writeFileSync(path, MALFORMED);
+    }
+  },
+  readseek: () => {},
   dylibs: () => {},
 };
 
@@ -188,14 +218,15 @@ try {
   for (const name of Object.keys(scenarios)) {
     const agentDir = join(scratch, name, "agent");
     const cwd = join(scratch, name, "project");
-    mkdirSync(agentDir, { recursive: true });
-    mkdirSync(cwd, { recursive: true });
-    const extraEnv = setups[name](agentDir, cwd) ?? {};
+    // pi-readseek reads ~/.pi/agent/settings.json from HOME regardless of PI_CODING_AGENT_DIR.
+    const home = join(scratch, name, "home");
+    for (const dir of [agentDir, cwd, home]) mkdirSync(dir, { recursive: true });
+    const extraEnv = setups[name](agentDir, cwd, home) ?? {};
     const { PI_FFF_MODE: _ignored, ...baseEnv } = process.env;
     const run = spawnSync(process.execPath, [import.meta.filename, `--scenario=${name}`], {
       cwd,
       encoding: "utf8",
-      env: { ...baseEnv, PI_CODING_AGENT_DIR: agentDir, PI_OFFLINE: "1", ...extraEnv },
+      env: { ...baseEnv, HOME: home, PI_CODING_AGENT_DIR: agentDir, PI_OFFLINE: "1", ...extraEnv },
       timeout: 180_000,
     });
     const marker = run.stdout?.split("\n").find((l) => l.startsWith("@@SMOKE@@"));
