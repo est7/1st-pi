@@ -26,7 +26,7 @@ Stack:
 - Markdown skills and documentation
 - JSON Pi themes
 
-There is currently no repository-level compiler, linter, formatter, or automated test suite. Validation is primarily syntax checks, resource drift checks, isolated Pi smoke tests, npm audit, and package dry-runs.
+There is currently no repository-level compiler, linter, formatter, or unit test suite. Validation is `npm run smoke` (isolated SDK load, ownership, defaults, surface snapshot), resource drift checks, `npm run check:outdated`, npm audit, and package dry-runs.
 
 ## STRUCTURE
 
@@ -37,6 +37,8 @@ There is currently no repository-level compiler, linter, formatter, or automated
 - `prompts/`: slash-command prompt templates.
 - `themes/`: publishable theme resources synchronized from `pi-everforest-tui`.
 - `scripts/sync-package-resources.mjs`: copies/checks dependency-owned static resources required in the tarball.
+- `scripts/smoke.mjs` and `scripts/smoke-surface.json`: isolated SDK smoke test and the reviewed tool/command surface snapshot.
+- `scripts/check-outdated.mjs`: reports dependencies whose declared range excludes the latest release.
 - `docs/`: audits and package-selection research.
 - `README.md`: user-facing installation, defaults, ownership, commands, and release documentation.
 
@@ -50,12 +52,15 @@ There is currently no repository-level compiler, linter, formatter, or automated
 | Reload during interactive development | `/reload` |
 | Synchronize vendored resources | `npm run sync:resources` |
 | Check resource drift | `npm run check:resources` |
+| Smoke-test the preset (no network/model) | `npm run smoke` |
+| Accept an intended tool/command surface change | `npm run smoke -- --update` |
+| Find dependencies behind their latest release | `npm run check:outdated` |
 | Audit production dependencies | `npm audit --omit=dev` |
 | Inspect package contents | `npm run pack:dry-run` |
 | Check patch whitespace | `git diff --check` |
 | Install local preset | `pi install .` |
 
-No generic `npm test` or `npm run build` command currently exists. For behavioral changes, create a focused smoke test that exercises the observable path; startup-only validation is insufficient for persistence, UI, mutation, native, or network behavior.
+No generic `npm test` or `npm run build` command currently exists. `npm run smoke` covers load, ownership, defaults, and the risky readseek path; extend `scripts/smoke.mjs` when a change adds a preset default or ownership rule. For other behavioral changes, create a focused smoke test that exercises the observable path; startup-only validation is insufficient for persistence, UI, mutation, native, or network behavior.
 
 ## CODING STANDARDS
 

@@ -50,6 +50,8 @@
   "scripts": {
     "sync:resources": "node scripts/sync-package-resources.mjs",
     "check:resources": "node scripts/sync-package-resources.mjs --check",
+    "check:outdated": "node scripts/check-outdated.mjs",
+    "smoke": "node scripts/smoke.mjs",
     "prepack": "npm run check:resources",
     "pack:dry-run": "npm pack --dry-run --json"
   },

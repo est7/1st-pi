@@ -148,7 +148,7 @@ Preset 默认开启以下 TUI 增强，session 中持久化的个人选择优先
 
 这些包位于普通 npm `dependencies`，安装 preset 时由 npm 获取，不会塞入 `1st-pi` tarball。`extensions/packages/*.ts` 是只负责调用 dependency extension entrypoint 的 thin adapters；因此依赖可以正常 hoist，同时 Pi manifest 只引用本包内稳定路径。FFF 也会由 npm 在 macOS、Linux 和 Windows 上选择正确的原生 binary。
 
-当前 dependency extension 版本以 `package.json` 与 lockfile 为准；维护时使用 npm `latest` 稳定标签，并通过 `npm outdated` 确认没有落后版本。
+当前 dependency extension 版本以 `package.json` 与 lockfile 为准；维护时使用 npm `latest` 稳定标签，并运行 `npm run check:outdated` 确认没有落后版本。该检查会指出 `package.json` 范围挡住最新版的依赖（例如 `^0.20.0` 不包含 0.21.0，`npm install` 不会提示），以及 lockfile 落后于范围的依赖。
 
 Themes 以及 `pi-init` skill 是发布所需的静态资源，会从锁定依赖同步到本包。`pi-web-access` 从 0.14.0 起不再提供 `librarian` skill，preset 同步移除该过期副本，保留 extension 自身的搜索、抓取与 source-check surface。更新 dependencies 后运行：
 
@@ -198,6 +198,14 @@ Tool Call Markers 默认分组相邻调用并折叠工具详情；可用 `PI_TOO
 
 该 SOP 覆盖 license/compatibility/ownership gate、thin adapter、README 同步、hoisted npm 安装、native binary、tarball size 与 clean-room smoke tests。
 
+`npm run smoke` 在隔离的 `PI_CODING_AGENT_DIR` 中通过 Pi SDK 加载 preset，不访问网络、不调用模型，检查：
+
+- 扩展加载无错误且与 `package.json#pi.extensions` 一致；工具无重名 owner；`read/edit/write`、`grep/find`、`bash/ls` 的 owner 符合上文
+- 全新安装时写入 preset 默认值，已有的显式 `subagents.json` / workflow 设置保持不变
+- `pi-tasks` 与 `pi-subagents` 的 RPC 协议版本匹配
+- readseek 在临时文件上执行 read → anchored edit → write，以及 macOS dylib 检测与 `otool -L` 一致
+- 工具与命令集合与 `scripts/smoke-surface.json` 快照一致；有意变更时用 `npm run smoke -- --update` 更新快照，并在 diff 中审阅
+
 ## 发布
 
 ```bash
@@ -205,9 +213,11 @@ npm login
 npm publish
 ```
 
-发布前建议检查包内容：
+发布前建议运行检查并确认包内容：
 
 ```bash
+npm run check:outdated
+npm run smoke
 npm pack --dry-run
 ```
 
